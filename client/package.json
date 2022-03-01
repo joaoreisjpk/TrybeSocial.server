@@ -3,6 +3,8 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
+    "c": "git add . && git commit -m",
+    "c:all": "git add ../ && git commit -m",
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
