@@ -4,12 +4,23 @@ import { MouseEvent, useState } from 'react';
 export default function Login() {
   const [user, setUser] = useState('');
   const [password, setPassword] = useState('');
+
   const handleClick = (
     e: MouseEvent<HTMLButtonElement, globalThis.MouseEvent>
   ) => {
     e.preventDefault();
-    console.log(user, password);
+
+    const URL = process.env.URL || 'http://localhost:3333';
+
+    fetch(`${URL}/signin`, {
+      method: 'POST',
+      body: JSON.stringify({
+        user,
+        password,
+      }),
+    });
   };
+
   return (
     <div>
       <Head>
@@ -22,7 +33,7 @@ export default function Login() {
         <input
           type='text'
           name='user'
-          className='border-2 m-2 border-black'
+          className='p-1 border-2 m-2 border-black'
           value={user}
           onChange={({ target }) => setUser(target.value)}
           id='user'
@@ -30,15 +41,15 @@ export default function Login() {
         <input
           type='password'
           name='password'
-          className='border-2 m-2 border-black'
+          className='p-1 border-2 m-2 border-black'
           value={password}
           onChange={({ target }) => setPassword(target.value)}
           id='password'
         />
         <button
-          onClick={(e) => handleClick(e)}
+          onClick={handleClick}
           type='submit'
-          className='border-2 m-2 border-black'
+          className='px-1 py-0.5 border-2 m-2 border-black'
         >
           Login
         </button>
