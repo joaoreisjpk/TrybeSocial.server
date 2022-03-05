@@ -1,5 +1,4 @@
 import Head from 'next/head';
-import { useRouter } from 'next/router';
 import { MouseEvent, useState } from 'react';
 
 export default function Login() {
@@ -7,28 +6,20 @@ export default function Login() {
   const [user, setUser] = useState('');
   const [password, setPassword] = useState('');
 
-  const handleClick = async (
+  const handleClick = (
     e: MouseEvent<HTMLButtonElement, globalThis.MouseEvent>
   ) => {
     e.preventDefault();
 
     const URL = process.env.URL || 'http://localhost:3333';
 
-    const body = JSON.stringify({
-      email: user,
-      password,
-    })
-
-    const response = await fetch(`${URL}/auth/signin`, {
+    fetch(`${URL}/signin`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: body,
-    }).then(data => data.json()) as { acess_token: string} | any;
-
-    if(response.acess_token) push('/main')
-    alert("acesso negado");
+      body: JSON.stringify({
+        user,
+        password,
+      }),
+    });
   };
 
   return (
