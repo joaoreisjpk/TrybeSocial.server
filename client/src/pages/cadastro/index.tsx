@@ -41,7 +41,7 @@ export default function Login() {
         <link rel='icon' href='/favicon.ico' />
       </Head>
       <Header />
-      <Container className='d-flex'>
+      <Container className='d-flex justify-content-center'>
         <Form action='' className='mt-5'>
           <Form.Group className='mb-3'>
             <h1 className='mb-4'>Cadastro</h1>
