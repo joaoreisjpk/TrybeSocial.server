@@ -27,7 +27,7 @@ export default function Login() {
       body: body,
     }).then(data => data.json()) as { acess_token: string} | any;
 
-    if(response.acess_token) push('/main')
+    if(response.acess_token) return push('/main-page')
     alert("acesso negado");
   };
 
