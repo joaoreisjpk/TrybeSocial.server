@@ -41,7 +41,7 @@ export default function Login() {
         <link rel='icon' href='/favicon.ico' />
       </Head>
       <Header />
-      <Container className='d-flex flex-row flex justify-content-center mt-5'>
+      <Container className='d-flex mt-5'>
         <Form action=''>
           <Form.Group className='mb-3'>
             <h1 className='mb-3'>Login</h1>
@@ -80,6 +80,7 @@ export default function Login() {
               size='lg'
               type='button'
               onClick={() => push('/cadastro')}
+              className='mr-1'
             >
               Quero me Cadastrar
             </Button>

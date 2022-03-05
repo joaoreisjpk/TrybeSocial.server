@@ -41,10 +41,10 @@ export default function Login() {
         <link rel='icon' href='/favicon.ico' />
       </Head>
       <Header />
-      <Container>
-        <Form action='' className='mt-5 w-50'>
+      <Container className='d-flex'>
+        <Form action='' className='mt-5'>
           <Form.Group className='mb-3'>
-            <h1 className=''>Cadastro</h1>
+            <h1 className='mb-4'>Cadastro</h1>
             <Form.Label>E-mail</Form.Label>
             <Form.Control
               type='text'
@@ -70,6 +70,7 @@ export default function Login() {
             <Button
               variant='outline-dark'
               size='lg'
+              className='w-100'
               onClick={handleClick}
               type='submit'
             >
