@@ -1,14 +1,14 @@
 version: '3.8'
 services:
-  server-trybe-social:
+  server-trybesocial:
     image: postgres:13
     ports:
       - 5432:5432
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: OrgulhoTryber
+      POSTGRES_USER: trybesocialdb
+      POSTGRES_PASSWORD: Tryber@123
       POSTGRES_DB: nest
     networks:
-     - trybesocial
+     - trybesocialnet
 networks:
-  trybesocial:
+  trybesocialnet:
