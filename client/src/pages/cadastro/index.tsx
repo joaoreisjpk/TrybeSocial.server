@@ -1,4 +1,5 @@
 import Head from 'next/head';
+import { useRouter } from 'next/router';
 import { MouseEvent, useState } from 'react';
 
 export default function Login() {
@@ -6,20 +7,28 @@ export default function Login() {
   const [user, setUser] = useState('');
   const [password, setPassword] = useState('');
 
-  const handleClick = (
+  const handleClick = async (
     e: MouseEvent<HTMLButtonElement, globalThis.MouseEvent>
   ) => {
     e.preventDefault();
 
     const URL = process.env.URL || 'http://localhost:3333';
 
-    fetch(`${URL}/signin`, {
+    const body = JSON.stringify({
+      email: user,
+      password,
+    })
+
+    const response = await fetch(`${URL}/auth/signup`, {
       method: 'POST',
-      body: JSON.stringify({
-        user,
-        password,
-      }),
-    });
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: body,
+    }).then(data => data.json()) as { acess_token: string} | any;
+
+    if(response.acess_token) return push('/login')
+    alert("usuário já existe");
   };
 
   return (
@@ -31,35 +40,34 @@ export default function Login() {
       </Head>
       <form action=''>
         <h1 className='text-3xl font-bold'>Login</h1>
-        <input
-          type='text'
-          name='user'
-          className='p-1 border-2 m-2 border-black'
-          value={user}
-          onChange={({ target }) => setUser(target.value)}
-          id='user'
-        />
-        <input
-          type='password'
-          name='password'
-          className='p-1 border-2 m-2 border-black'
-          value={password}
-          onChange={({ target }) => setPassword(target.value)}
-          id='password'
-        />
+        <label htmlFor="user">
+          email
+          <input
+            type='text'
+            name='user'
+            className='p-1 border-2 m-2 border-black'
+            value={user}
+            onChange={({ target }) => setUser(target.value)}
+            id='user'
+          />
+        </label>
+        <label htmlFor="password">
+          senha
+          <input
+            type='password'
+            name='password'
+            className='p-1 border-2 m-2 border-black'
+            value={password}
+            onChange={({ target }) => setPassword(target.value)}
+            id='password'
+          />
+        </label>
         <button
           onClick={handleClick}
           type='submit'
           className='px-1 py-0.5 border-2 m-2 border-black'
         >
-          Login
-        </button>
-        <button
-          onClick={() => push('/cadastro')}
-          type='submit'
-          className='px-1 py-0.5 border-2 m-2 border-black'
-        >
-          Quero me Cadastrar
+          Cadastrar
         </button>
       </form>
     </div>
