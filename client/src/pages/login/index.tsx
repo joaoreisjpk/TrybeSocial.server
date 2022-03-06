@@ -3,11 +3,30 @@ import { useRouter } from 'next/router';
 import { MouseEvent, useState } from 'react';
 import { Button, Container, Row, Col, Form } from 'react-bootstrap';
 import Header from '../../components/Header';
+import * as Validation from '../../helpers/validation';
 
 export default function Login() {
   const { push } = useRouter();
   const [user, setUser] = useState('');
   const [password, setPassword] = useState('');
+  const [emailCondition, setEmailCondition] = useState({
+    valid: false,
+    invalid: false,
+    msg: '',
+  });
+
+  const emailValidation = (emailValue: string) => {
+    const emailResult = Validation.emailVerifier(emailValue);
+    if (emailResult) {
+      return setEmailCondition({
+        valid: false,
+        invalid: true,
+        msg: emailResult,
+      });
+    }
+
+    setEmailCondition({ valid: true, invalid: false, msg: '' });
+  };
 
   const handleClick = async (
     e: MouseEvent<HTMLButtonElement, globalThis.MouseEvent>
@@ -47,13 +66,20 @@ export default function Login() {
             <h1 className='mb-3'>Login</h1>
             <Form.Label>E-mail</Form.Label>
             <Form.Control
+              isValid={emailCondition.valid}
+              isInvalid={emailCondition.invalid}
+              onBlur={({ target }) => emailValidation(target.value)}
               type='text'
               name='user'
               className=''
               value={user}
               onChange={({ target }) => setUser(target.value)}
               id='user'
+              aria-describedby='passwordFeedback'
             />
+            <Form.Text id='passwordFeedback' muted>
+              {emailCondition.msg}
+            </Form.Text>
           </Form.Group>
           <Form.Group className='mb-3'>
             <Form.Label>Password</Form.Label>
