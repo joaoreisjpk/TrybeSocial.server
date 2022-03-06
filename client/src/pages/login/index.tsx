@@ -5,28 +5,22 @@ import { Button, Container, Row, Col, Form } from 'react-bootstrap';
 import Header from '../../components/Header';
 import * as Validation from '../../helpers/validation';
 
+const INITIAL_CONDITION = {
+  valid: false, invalid: false, msg: '',
+}
+
 export default function Login() {
   const { push } = useRouter();
   const [user, setUser] = useState('');
   const [password, setPassword] = useState('');
-  const [emailCondition, setEmailCondition] = useState({
-    valid: false,
-    invalid: false,
-    msg: '',
-  });
-  const [passwordCondition, setPasswordCondition] = useState({
-    valid: false,
-    invalid: false,
-    msg: '',
-  });
+  const [emailCondition, setEmailCondition] = useState(INITIAL_CONDITION);
+  const [passwordCondition, setPasswordCondition] = useState(INITIAL_CONDITION);
 
   const emailValidation = (emailValue: string) => {
     const emailResult = Validation.emailVerifier(emailValue);
     if (emailResult) {
       return setEmailCondition({
-        valid: false,
-        invalid: true,
-        msg: emailResult,
+        valid: false, invalid: true, msg: emailResult,
       });
     }
 
@@ -37,9 +31,7 @@ export default function Login() {
     const passwordResult = Validation.passwordVerifier(passwordValue);
     if (passwordResult) {
       return setPasswordCondition({
-        valid: false,
-        invalid: true,
-        msg: passwordResult,
+        valid: false, invalid: true, msg: passwordResult,
       });
     }
 
@@ -93,15 +85,18 @@ export default function Login() {
               value={user}
               onChange={({ target }) => setUser(target.value)}
               id='user'
-              aria-describedby='passwordFeedback'
+              aria-describedby='emailFeedback'
             />
-            <Form.Text id='passwordFeedback' muted>
+            <Form.Text id='emailFeedback' muted>
               {emailCondition.msg}
             </Form.Text>
           </Form.Group>
           <Form.Group className='mb-3'>
             <Form.Label>Password</Form.Label>
             <Form.Control
+              isValid={passwordCondition.valid}
+              isInvalid={passwordCondition.invalid}
+              onBlur={({ target }) => passwordValidation(target.value)}
               type='password'
               name='password'
               className=''
@@ -109,6 +104,9 @@ export default function Login() {
               onChange={({ target }) => setPassword(target.value)}
               id='password'
             />
+            <Form.Text id='emailFeedback' muted>
+              {passwordCondition.msg}
+            </Form.Text>
           </Form.Group>
           <Form.Group className='mb-3'>
             <Button
