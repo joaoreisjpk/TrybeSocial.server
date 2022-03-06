@@ -14,6 +14,11 @@ export default function Login() {
     invalid: false,
     msg: '',
   });
+  const [passwordCondition, setPasswordCondition] = useState({
+    valid: false,
+    invalid: false,
+    msg: '',
+  });
 
   const emailValidation = (emailValue: string) => {
     const emailResult = Validation.emailVerifier(emailValue);
@@ -26,6 +31,19 @@ export default function Login() {
     }
 
     setEmailCondition({ valid: true, invalid: false, msg: '' });
+  };
+
+  const passwordValidation = (passwordValue: string) => {
+    const passwordResult = Validation.passwordVerifier(passwordValue);
+    if (passwordResult) {
+      return setPasswordCondition({
+        valid: false,
+        invalid: true,
+        msg: passwordResult,
+      });
+    }
+
+    setPasswordCondition({ valid: true, invalid: false, msg: '' });
   };
 
   const handleClick = async (
