@@ -104,6 +104,7 @@ export default function Login() {
               size='lg'
               onClick={handleClick}
               type='submit'
+              disabled={!emailCondition.valid || !passwordCondition.valid}
             >
               Login
             </Button>
