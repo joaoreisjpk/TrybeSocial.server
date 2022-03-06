@@ -20,6 +20,7 @@ export default function Login() {
   const [password, setPassword] = useState('');
   const [emailCondition, setEmailCondition] = useState(INITIAL_CONDITION);
   const [passwordCondition, setPasswordCondition] = useState(INITIAL_CONDITION);
+  const [unauthorized, setUnauthotorized] = useState('');
 
   const emailValidation = (emailValue: string) => {
     const emailResult = Validation.emailVerifier(emailValue);
@@ -64,7 +65,10 @@ export default function Login() {
     }).then((data) => data.json())) as { acess_token: string } | any;
 
     if (response.acess_token) return push('/main-page');
-    alert('acesso negado');
+    // alert('acesso negado');
+    setUnauthotorized('Email ou Password incorretos');
+    setEmailCondition(INITIAL_CONDITION);
+    setPasswordCondition(INITIAL_CONDITION);
   };
 
   return (
@@ -117,6 +121,9 @@ export default function Login() {
             >
               Quero me Cadastrar
             </Button>
+            <Form.Text className='d-block font-monospace text-danger fw-bolder'>
+              { unauthorized }
+            </Form.Text>
           </Form.Group>
         </Form>
       </Container>
