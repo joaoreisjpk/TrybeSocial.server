@@ -1,31 +1,47 @@
 import Head from 'next/head';
 import { useRouter } from 'next/router';
 import { MouseEvent, useState } from 'react';
-import { Button, Container, Row, Col, Form } from 'react-bootstrap';
+import Button from 'react-bootstrap/Button';
+import Container from 'react-bootstrap/Container';
+// import Row from 'react-bootstrap/Row';
+// import Col from 'react-bootstrap/Col';
+import Form from 'react-bootstrap/Form';
 import Header from '../../components/Header';
+import FormInput from './_formInput';
 import * as Validation from '../../helpers/validation';
+
+const INITIAL_CONDITION = {
+  valid: false, invalid: false, msg: '',
+}
 
 export default function Login() {
   const { push } = useRouter();
   const [user, setUser] = useState('');
   const [password, setPassword] = useState('');
-  const [emailCondition, setEmailCondition] = useState({
-    valid: false,
-    invalid: false,
-    msg: '',
-  });
+  const [emailCondition, setEmailCondition] = useState(INITIAL_CONDITION);
+  const [passwordCondition, setPasswordCondition] = useState(INITIAL_CONDITION);
+  const [unauthorized, setUnauthotorized] = useState('');
 
   const emailValidation = (emailValue: string) => {
     const emailResult = Validation.emailVerifier(emailValue);
     if (emailResult) {
       return setEmailCondition({
-        valid: false,
-        invalid: true,
-        msg: emailResult,
+        valid: false, invalid: true, msg: emailResult,
       });
     }
 
     setEmailCondition({ valid: true, invalid: false, msg: '' });
+  };
+
+  const passwordValidation = (passwordValue: string) => {
+    const passwordResult = Validation.passwordVerifier(passwordValue);
+    if (passwordResult) {
+      return setPasswordCondition({
+        valid: false, invalid: true, msg: passwordResult,
+      });
+    }
+
+    setPasswordCondition({ valid: true, invalid: false, msg: '' });
   };
 
   const handleClick = async (
@@ -49,7 +65,10 @@ export default function Login() {
     }).then((data) => data.json())) as { acess_token: string } | any;
 
     if (response.acess_token) return push('/main-page');
-    alert('acesso negado');
+    // alert('acesso negado');
+    setUnauthotorized('Email ou Password incorretos');
+    setEmailCondition(INITIAL_CONDITION);
+    setPasswordCondition(INITIAL_CONDITION);
   };
 
   return (
@@ -65,31 +84,22 @@ export default function Login() {
           <Form.Group className='mb-3'>
             <h1 className='mb-3'>Login</h1>
             <Form.Label>E-mail</Form.Label>
-            <Form.Control
-              isValid={emailCondition.valid}
-              isInvalid={emailCondition.invalid}
-              onBlur={({ target }) => emailValidation(target.value)}
-              type='text'
-              name='user'
-              className=''
+            <FormInput
+              stateCondition={emailCondition}
               value={user}
-              onChange={({ target }) => setUser(target.value)}
-              id='user'
-              aria-describedby='passwordFeedback'
+              setValue={setUser}
+              validation={emailValidation}
+              name='user'
             />
-            <Form.Text id='passwordFeedback' muted>
-              {emailCondition.msg}
-            </Form.Text>
           </Form.Group>
           <Form.Group className='mb-3'>
             <Form.Label>Password</Form.Label>
-            <Form.Control
-              type='password'
-              name='password'
-              className=''
+            <FormInput
+              stateCondition={passwordCondition}
               value={password}
-              onChange={({ target }) => setPassword(target.value)}
-              id='password'
+              setValue={setPassword}
+              validation={passwordValidation}
+              name='password'
             />
           </Form.Group>
           <Form.Group className='mb-3'>
@@ -98,6 +108,7 @@ export default function Login() {
               size='lg'
               onClick={handleClick}
               type='submit'
+              disabled={!emailCondition.valid || !passwordCondition.valid}
             >
               Login
             </Button>
@@ -110,6 +121,9 @@ export default function Login() {
             >
               Quero me Cadastrar
             </Button>
+            <Form.Text className='d-block font-monospace text-danger fw-bolder'>
+              { unauthorized }
+            </Form.Text>
           </Form.Group>
         </Form>
       </Container>
