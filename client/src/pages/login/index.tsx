@@ -1,8 +1,13 @@
 import Head from 'next/head';
 import { useRouter } from 'next/router';
 import { MouseEvent, useState } from 'react';
-import { Button, Container, Row, Col, Form } from 'react-bootstrap';
+import Button from 'react-bootstrap/Button';
+import Container from 'react-bootstrap/Container';
+// import Row from 'react-bootstrap/Row';
+// import Col from 'react-bootstrap/Col';
+import Form from 'react-bootstrap/Form';
 import Header from '../../components/Header';
+import FormInput from './_formInput';
 import * as Validation from '../../helpers/validation';
 
 const INITIAL_CONDITION = {
@@ -75,38 +80,23 @@ export default function Login() {
           <Form.Group className='mb-3'>
             <h1 className='mb-3'>Login</h1>
             <Form.Label>E-mail</Form.Label>
-            <Form.Control
-              isValid={emailCondition.valid}
-              isInvalid={emailCondition.invalid}
-              onBlur={({ target }) => emailValidation(target.value)}
-              type='text'
-              name='user'
-              className=''
+            <FormInput
+              stateCondition={emailCondition}
               value={user}
-              onChange={({ target }) => setUser(target.value)}
-              id='user'
-              aria-describedby='emailFeedback'
+              setValue={setUser}
+              validation={emailValidation}
+              name='user'
             />
-            <Form.Text id='emailFeedback' muted>
-              {emailCondition.msg}
-            </Form.Text>
           </Form.Group>
           <Form.Group className='mb-3'>
             <Form.Label>Password</Form.Label>
-            <Form.Control
-              isValid={passwordCondition.valid}
-              isInvalid={passwordCondition.invalid}
-              onBlur={({ target }) => passwordValidation(target.value)}
-              type='password'
-              name='password'
-              className=''
+            <FormInput
+              stateCondition={passwordCondition}
               value={password}
-              onChange={({ target }) => setPassword(target.value)}
-              id='password'
+              setValue={setPassword}
+              validation={passwordValidation}
+              name='password'
             />
-            <Form.Text id='emailFeedback' muted>
-              {passwordCondition.msg}
-            </Form.Text>
           </Form.Group>
           <Form.Group className='mb-3'>
             <Button

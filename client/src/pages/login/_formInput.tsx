@@ -21,7 +21,7 @@ export default function FormInput(
     isValid={stateCondition.valid}
     isInvalid={stateCondition.invalid}
     onBlur={({ target }) => validation(target.value)}
-    type='text'
+    type={ name === 'password' ? 'password' : 'text' }
     name={name}
     className=''
     value={value}
