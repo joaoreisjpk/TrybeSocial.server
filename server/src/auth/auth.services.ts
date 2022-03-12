@@ -1,18 +1,14 @@
-import { ForbiddenException, Injectable } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
 import * as argon from 'argon2';
-import { JwtService } from '@nestjs/jwt';
 import { AuthDto } from './dto';
-import { PrismaService } from './prisma/prisma.service';
+import { PrismaClient } from '@prisma/client';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime';
 
-@Injectable()
 export class AuthService {
-  constructor(
-    private prisma: PrismaService,
-    private jwt: JwtService,
-    private config: ConfigService,
-  ) {}
+  prisma: PrismaClient;
+
+  constructor() {
+    this.prisma = new PrismaClient();
+  }
 
   async signup(dto: AuthDto) {
     const { email, password, firstName, lastName } = dto;
@@ -29,11 +25,11 @@ export class AuthService {
         },
       });
 
-      return this.signToken(user.id, user.email);
+      // return this.signToken(user.id, user.email);
     } catch (err) {
       if (err instanceof PrismaClientKnownRequestError) {
         if (err.code === 'P2002') {
-          throw new ForbiddenException('Email já utilizado');
+          throw new Error('Email já utilizado');
         }
       }
       throw err;
@@ -47,20 +43,21 @@ export class AuthService {
       },
     });
 
-    if (!user) throw new ForbiddenException('Email ou Senha incorretos');
+    return user;
+    if (!user) throw new Error('Email ou Senha incorretos');
 
     const pwMatches = await argon.verify(user.hash, dto.password);
 
-    if (!pwMatches) throw new ForbiddenException('Email ou Senha incorretos');
+    if (!pwMatches) throw new Error('Email ou Senha incorretos');
 
-    return this.signToken(user.id, user.email);
+    // return this.signToken(user.id, user.email);
   }
 
   async getAll() {
     return this.prisma.user.findMany();
   }
 
-  async signToken(userId: number, email: string) {
+  /* async signToken(userId: number, email: string) {
     const payload = {
       sub: userId,
       email,
@@ -74,5 +71,5 @@ export class AuthService {
     });
 
     return { acess_token: token };
-  }
+  } */
 }

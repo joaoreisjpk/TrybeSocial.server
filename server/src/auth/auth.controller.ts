@@ -1,31 +1,27 @@
-import {
-  Body,
-  Controller,
-  Get,
-  HttpCode,
-  HttpStatus,
-  Post,
-} from '@nestjs/common';
-import { AuthService } from './auth.service';
+import { Request, Response } from 'express';
+import { AuthService } from './auth.services';
 import { AuthDto } from './dto';
 
-@Controller('auth')
+const authService = new AuthService();
+
 export class AuthController {
-  constructor(private authService: AuthService) {}
+  authService: AuthService;
 
-  @Post('signup')
-  signup(@Body() dto: AuthDto) {
-    console.log(dto);
-    return this.authService.signup(dto);
+  constructor() {
+    this.authService = new AuthService();
   }
 
-  @HttpCode(HttpStatus.OK)
-  @Post('signin')
-  signin(@Body() dto: AuthDto) {
-    return this.authService.signin(dto);
+  signup(req: Request, res: Response) {
+    const user = authService.signup(req.body as AuthDto);
+
+    return res.json(user);
   }
 
-  @Get('users')
+  async signin(req: Request, res: Response) {
+    const user = await authService.signin(req.body as AuthDto);
+    return res.json(user);
+  }
+
   users() {
     return this.authService.getAll();
   }
