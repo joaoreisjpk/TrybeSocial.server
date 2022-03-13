@@ -1,7 +1,8 @@
-import * as argon from 'argon2';
+import argon from 'argon2';
 import { AuthDto } from './dto';
 import { PrismaClient } from '@prisma/client';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime';
+import jwt from 'jsonwebtoken';
 
 export class AuthService {
   prisma: PrismaClient;
@@ -10,9 +11,8 @@ export class AuthService {
     this.prisma = new PrismaClient();
   }
 
-  /* async signup(dto: AuthDto) {
+  async signup(dto: AuthDto) {
     const { email, password, firstName, lastName } = dto;
-
     const hash = await argon.hash(password);
 
     try {
@@ -25,50 +25,52 @@ export class AuthService {
         },
       });
 
-      // return this.signToken(user.id, user.email);
+      return user;
+
+      return this.signToken(user.id, user.email);
     } catch (err) {
       if (err instanceof PrismaClientKnownRequestError) {
         if (err.code === 'P2002') {
-          throw new Error('Email já utilizado');
+          return { error: 'Email já utilizado' };
         }
       }
-      throw err;
+      return { error: err };
     }
-  } */
+  }
 
-  /* async signin(dto: AuthDto) {
+  async signin({ email, password }: AuthDto) {
     const user = await this.prisma.user.findUnique({
       where: {
-        email: dto.email,
+        email,
       },
     });
 
-    if (!user) throw new Error('Email ou Senha incorretos');
+    if (!user) return { error: 'Email ou Senha incorretos' };
 
-    const pwMatches = await argon.verify(user.hash, dto.password);
+    const pwMatches = await argon.verify(user.hash, password);
 
-    if (!pwMatches) throw new Error('Email ou Senha incorretos');
+    if (!pwMatches) return { error: 'Email ou Senha incorretos' };
 
     return this.signToken(user.id, user.email);
-  } */
+  }
 
   async getAll() {
     return this.prisma.user.findMany();
   }
 
-  /* async signToken(userId: number, email: string) {
+  async signToken(userId: number, email: string) {
     const payload = {
       sub: userId,
       email,
     };
 
-    const secret = this.config.get('JWT_SECRET');
+    const secret = process.env.JWT_SECRET;
 
-    const token = await this.jwt.signAsync(payload, {
+    const token = jwt.sign(payload, secret, {
+      algorithm: 'HS256',
       expiresIn: '15min',
-      secret,
     });
 
     return { acess_token: token };
-  } */
+  }
 }
