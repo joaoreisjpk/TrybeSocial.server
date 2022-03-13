@@ -6,9 +6,11 @@ import jwt from 'jsonwebtoken';
 
 export class AuthService {
   prisma: PrismaClient;
+  secret: string;
 
   constructor() {
     this.prisma = new PrismaClient();
+    this.secret = process.env.JWT_SECRET;
   }
 
   async signup(dto: AuthDto) {
@@ -16,7 +18,7 @@ export class AuthService {
     const hash = await argon.hash(password);
 
     try {
-      const user = await this.prisma.user.create({
+      const newUser = await this.prisma.user.create({
         data: {
           email,
           hash,
@@ -25,9 +27,10 @@ export class AuthService {
         },
       });
 
-      return user;
+      const tokens = await this.getTokens(newUser.id, newUser.email);
+      await this.updateRtHash(newUser.id, tokens.refresh_token);
 
-      return this.signToken(user.id, user.email);
+      return tokens;
     } catch (err) {
       if (err instanceof PrismaClientKnownRequestError) {
         if (err.code === 'P2002') {
@@ -58,19 +61,81 @@ export class AuthService {
     return this.prisma.user.findMany();
   }
 
+  // TODO
+  async logout(userId: number) {
+    await this.prisma.user.updateMany({
+      where: {
+        id: userId,
+      },
+      data: { tokenRt: null },
+    });
+  }
+
   async signToken(userId: number, email: string) {
     const payload = {
       sub: userId,
       email,
     };
 
-    const secret = process.env.JWT_SECRET;
-
-    const token = jwt.sign(payload, secret, {
+    const token = jwt.sign(payload, this.secret, {
       algorithm: 'HS256',
       expiresIn: '15min',
     });
 
     return { acess_token: token };
+  }
+
+  async refreshTokens(userId: number, rt: string) {
+    const user = await this.prisma.user.findUnique({
+      where: {
+        id: userId,
+      },
+    });
+
+    if (!user || !user.tokenRt) return { error: 'Access Denied' };
+
+    const rtMatches = await argon.verify(rt, user.tokenRt);
+
+    if (!rtMatches) return { error: 'Access Denied' };
+
+    const tokens = await this.getTokens(user.id, user.email);
+
+    await this.updateRtHash(user.id, tokens.refresh_token);
+
+    return tokens;
+  }
+
+  async updateRtHash(userId: number, rt: string) {
+    const hash = await argon.hash(rt);
+    await this.prisma.user.update({
+      where: {
+        id: userId,
+      },
+      data: {
+        tokenRt: hash,
+      },
+    });
+  }
+
+  async getTokens(userId: number, email: string) {
+    const payload = {
+      sub: userId,
+      email,
+    };
+
+    const at = jwt.sign(payload, this.secret, {
+      algorithm: 'HS256',
+      expiresIn: '15min',
+    });
+
+    const rt = jwt.sign(payload, this.secret, {
+      algorithm: 'HS256',
+      expiresIn: '7d',
+    });
+
+    return {
+      acess_token: at,
+      refresh_token: rt,
+    };
   }
 }

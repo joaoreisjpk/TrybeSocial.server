@@ -17,6 +17,7 @@ model User {
 
   email String @unique
   hash  String
+  tokenRt String?
 
   firstName String?
   lastName  String?
