@@ -56,7 +56,7 @@ export class AuthService {
     const tokens = await this.getTokens(user.id, user.email);
     await this.updateRtHash(user.id, tokens.refresh_token);
 
-    return tokens;
+    return { ...tokens, email: user.email };
   }
 
   async getAll() {
@@ -64,19 +64,19 @@ export class AuthService {
   }
 
   // TODO
-  async logout(userId: number) {
+  async logout(email: string) {
     await this.prisma.user.update({
       where: {
-        id: userId,
+        email: email,
       },
       data: { tokenRt: null },
     });
   }
 
-  async refreshTokens(userId: number, rt: string) {
+  async refreshTokens(email: string, rt: string) {
     const user = await this.prisma.user.findUnique({
       where: {
-        id: userId,
+        email: email,
       },
     });
 
@@ -89,7 +89,7 @@ export class AuthService {
 
     await this.updateRtHash(user.id, tokens.refresh_token);
 
-    return tokens;
+    return { ...tokens, email: user.email };
   }
 
   async updateRtHash(userId: number, rt: string) {
