@@ -7,32 +7,33 @@ import {
   SetStateAction,
 } from 'react';
 
+import Cookies from 'js-cookie';
+
 interface IContext {
   authorized: boolean;
-  authLoading: boolean;
   Logout: () => Promise<void>;
   setAuthorized: Dispatch<SetStateAction<boolean>>;
-  email: string;
-  setEmail: Dispatch<SetStateAction<string>>;
+  email: string | undefined;
+  setEmail: Dispatch<SetStateAction<string | undefined>>;
 }
 
 const initialValues = {
   authorized: false,
-  authLoading: true,
 };
 
 export const AuthContext = createContext(initialValues as IContext);
 
+const storageEmail = () => Cookies.get('userEmail');
+
 export function ResultsProvider({ children }: { children: JSX.Element }): any {
   const [authorized, setAuthorized] = useState(false);
-  const [authLoading, setAuthLoading] = useState(true);
-  const [email, setEmail] = useState('');
-
+  const [email, setEmail] = useState(storageEmail());
   const URL = process.env.URL || 'http://localhost:3333';
-  const storageEmail = () => localStorage.getItem('userEmail') || '';
+
+  storageEmail();
 
   async function Authenticator() {
-    const token = localStorage.getItem('tokenRt') || '';
+    const token = Cookies.get('tokenRt') || '';
     console.log(storageEmail());
 
     const AuthResponse = await fetch(`${URL}/auth/refresh/${storageEmail()}`, {
@@ -45,18 +46,17 @@ export function ResultsProvider({ children }: { children: JSX.Element }): any {
 
     const { acess_token, refresh_token, email: userEmail } = AuthResponse;
 
-    setAuthLoading(false);
     if (refresh_token && userEmail && acess_token) {
-      localStorage.setItem('tokenAt', acess_token);
-      localStorage.setItem('tokenRt', refresh_token);
-      localStorage.setItem('userEmail', email);
+      Cookies.set('tokenAt', acess_token);
+      Cookies.set('tokenRt', refresh_token);
+      Cookies.set('userEmail', userEmail);
       setEmail(storageEmail());
       setAuthorized(true);
     }
   }
 
   async function Logout() {
-    const token = localStorage.getItem('tokenRt') || '';
+    const token = Cookies.get('tokenRt') || '';
 
     await fetch(`${URL}/auth/logout/${storageEmail()}`, {
       method: 'POST',
@@ -70,12 +70,8 @@ export function ResultsProvider({ children }: { children: JSX.Element }): any {
   }
 
   useEffect(() => {
-    const tokenRt = localStorage.getItem('tokenRt');
-    if (!storageEmail()) {
-      setAuthLoading(false);
-    }
+    const tokenRt = Cookies.get('tokenRt');
     if (tokenRt) {
-      Authenticator();
       setInterval(() => {
         Authenticator();
       }, 1000 * 60 * 5); // 10min
@@ -86,7 +82,6 @@ export function ResultsProvider({ children }: { children: JSX.Element }): any {
     <AuthContext.Provider
       value={{
         authorized,
-        authLoading,
         Logout,
         setAuthorized,
         email,

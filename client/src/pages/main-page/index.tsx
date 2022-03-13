@@ -1,4 +1,4 @@
-import { GetServerSideProps, GetServerSidePropsResult } from 'next';
+import { GetServerSideProps } from 'next';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
 import React, { useEffect } from 'react';
@@ -6,13 +6,7 @@ import Header from '../../components/Header';
 import { useAuth } from '../../hooks/useAuth';
 
 export default function MainPage() {
-  const { authorized, email } = useAuth();
-  const { replace } = useRouter();
-
-  /* useEffect(() => {
-    if (!authorized) replace('/login');
-  }, [authorized, replace]); */
-
+  const { email } = useAuth();
   return (
     <div>
       <Head>
