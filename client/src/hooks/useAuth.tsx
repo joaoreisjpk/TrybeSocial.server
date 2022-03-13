@@ -54,6 +54,21 @@ export function ResultsProvider({ children }: { children: JSX.Element }): any {
     }
   }
 
+  async function fetchLogin(body) {
+    return fetch(`${URL}/auth/signin`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body,
+    }).then((data) => data.json()) as {
+      acess_token?: string;
+      refresh_token?: string;
+      error?: string;
+      email?: string;
+    };
+  }
+
   async function Logout() {
     const token = Cookies.get('tokenRt') || '';
 
