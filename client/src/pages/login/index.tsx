@@ -1,30 +1,41 @@
 import Head from 'next/head';
 import { useRouter } from 'next/router';
-import { MouseEvent, useState } from 'react';
+import { MouseEvent, useEffect, useState } from 'react';
 import Button from 'react-bootstrap/Button';
 import Container from 'react-bootstrap/Container';
 import Form from 'react-bootstrap/Form';
+
 import Header from '../../components/Header';
 import FormInput from './_formInput';
 import * as Validation from '../../helpers/validation';
+import { useAuth } from '../../hooks/useAuth';
 
 const INITIAL_CONDITION = {
-  valid: false, invalid: false, msg: '',
-}
+  valid: false,
+  invalid: false,
+  msg: '',
+};
 
 export default function Login() {
-  const { push } = useRouter();
+  const { push, replace } = useRouter();
   const [user, setUser] = useState('');
   const [password, setPassword] = useState('');
   const [emailCondition, setEmailCondition] = useState(INITIAL_CONDITION);
   const [passwordCondition, setPasswordCondition] = useState(INITIAL_CONDITION);
   const [unauthorized, setUnauthotorized] = useState('');
+  const { authorized, setAuthorized, setEmail } = useAuth();
+
+  useEffect(() => {
+    if (authorized) replace('/main-page');
+  }, [authorized, replace]);
 
   const emailValidation = (emailValue: string) => {
     const emailResult = Validation.emailVerifier(emailValue);
     if (emailResult) {
       return setEmailCondition({
-        valid: false, invalid: true, msg: emailResult,
+        valid: false,
+        invalid: true,
+        msg: emailResult,
       });
     }
 
@@ -35,7 +46,9 @@ export default function Login() {
     const passwordResult = Validation.passwordVerifier(passwordValue);
     if (passwordResult) {
       return setPasswordCondition({
-        valid: false, invalid: true, msg: passwordResult,
+        valid: false,
+        invalid: true,
+        msg: passwordResult,
       });
     }
 
@@ -54,17 +67,28 @@ export default function Login() {
       password,
     });
 
-    const { acess_token, refresh_token, error } = await fetch(`${URL}/auth/signin`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: body,
-    }).then((data) => data.json()) as {acess_token?: string, refresh_token?: string, error?: string}
+    const { acess_token, refresh_token, error, email } = (await fetch(
+      `${URL}/auth/signin`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: body,
+      }
+    ).then((data) => data.json())) as {
+      acess_token?: string;
+      refresh_token?: string;
+      error?: string;
+      email?: string;
+    };
 
-    if (acess_token) {
-      localStorage.setItem('tokenAt', acess_token || '')
-      localStorage.setItem('tokenAt', refresh_token || '')
+    if (acess_token && email && refresh_token) {
+      localStorage.setItem('tokenAt', acess_token);
+      localStorage.setItem('tokenRt', refresh_token);
+      localStorage.setItem('userEmail', email);
+      setEmail(email);
+      setAuthorized(true);
       return push('/main-page');
     } else {
       setUnauthotorized(error || 'Algum erro ocorreu');
@@ -124,7 +148,7 @@ export default function Login() {
               Quero me Cadastrar
             </Button>
             <Form.Text className='d-block font-monospace text-danger fw-bolder'>
-              { unauthorized }
+              {unauthorized}
             </Form.Text>
           </Form.Group>
         </Form>

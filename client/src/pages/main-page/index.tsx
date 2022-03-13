@@ -1,8 +1,17 @@
 import Head from 'next/head';
-import React from 'react';
+import { useRouter } from 'next/router';
+import React, { useEffect } from 'react';
 import Header from '../../components/Header';
+import { useAuth } from '../../hooks/useAuth';
 
-export default function index() {
+export default function MainPage() {
+  const { authorized, email } = useAuth();
+  const { replace } = useRouter();
+
+  useEffect(() => {
+    if (!authorized) replace('/login');
+  }, [authorized, replace]);
+
   return (
     <div>
       <Head>
@@ -12,6 +21,7 @@ export default function index() {
       </Head>
       <Header />
       <h1>Main Page</h1>
+      <h2>Você está logado com o email: {email}</h2>
     </div>
   );
 }

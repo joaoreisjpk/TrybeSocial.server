@@ -1,9 +1,19 @@
 import React from 'react';
-import { Container, Nav, Navbar } from 'react-bootstrap';
+import { Button, Container, Nav, Navbar } from 'react-bootstrap';
 import Link from './Link';
 import NextLink from 'next/link';
+import { useAuth } from '../hooks/useAuth';
+import { useRouter } from 'next/router';
 
 export default function Header() {
+  const { Logout } = useAuth();
+  const { push } = useRouter();
+
+  const handleClick = async () => {
+    await Logout();
+    push('/login');
+  };
+
   return (
     <Navbar bg='dark' variant='dark' expand='lg'>
       <Container className='d-flex justify-content-between'>
@@ -16,6 +26,7 @@ export default function Header() {
             <Link href='/main-page'>Home</Link>
             <Link href='/login'>Login</Link>
             <Link href='/cadastro'>Cadastro</Link>
+            <Button onClick={handleClick}>Logout</Button>
           </Nav>
         </Navbar.Collapse>
       </Container>
