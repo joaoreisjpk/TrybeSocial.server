@@ -10,7 +10,7 @@ export class AuthService {
     this.prisma = new PrismaClient();
   }
 
-  async signup(dto: AuthDto) {
+  /* async signup(dto: AuthDto) {
     const { email, password, firstName, lastName } = dto;
 
     const hash = await argon.hash(password);
@@ -34,24 +34,23 @@ export class AuthService {
       }
       throw err;
     }
-  }
+  } */
 
-  async signin(dto: AuthDto) {
+  /* async signin(dto: AuthDto) {
     const user = await this.prisma.user.findUnique({
       where: {
         email: dto.email,
       },
     });
 
-    return user;
     if (!user) throw new Error('Email ou Senha incorretos');
 
     const pwMatches = await argon.verify(user.hash, dto.password);
 
     if (!pwMatches) throw new Error('Email ou Senha incorretos');
 
-    // return this.signToken(user.id, user.email);
-  }
+    return this.signToken(user.id, user.email);
+  } */
 
   async getAll() {
     return this.prisma.user.findMany();
