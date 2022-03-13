@@ -1,3 +1,4 @@
+import { GetServerSideProps, GetServerSidePropsResult } from 'next';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
 import React, { useEffect } from 'react';
@@ -8,9 +9,9 @@ export default function MainPage() {
   const { authorized, email } = useAuth();
   const { replace } = useRouter();
 
-  useEffect(() => {
+  /* useEffect(() => {
     if (!authorized) replace('/login');
-  }, [authorized, replace]);
+  }, [authorized, replace]); */
 
   return (
     <div>
@@ -25,3 +26,41 @@ export default function MainPage() {
     </div>
   );
 }
+
+export const getServerSideProps: GetServerSideProps = async ({ req }) => {
+  const { tokenAt, tokenRt, userEmail } = req.cookies;
+
+  if (!tokenRt || !userEmail) {
+    return {
+      props: {},
+      redirect: {
+        destination: '/login',
+      },
+    };
+  }
+
+  const response = await fetch(
+    `http://localhost:3333/auth/refresh/${userEmail}`,
+    {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'token': tokenRt,
+      },
+    }
+  );
+
+  const tokens = await response.json();
+
+  if (tokens.refresh_token)
+    return {
+      props: {},
+      redirect: {
+        destination: '/login',
+      },
+    };
+
+  return {
+    props: { userEmail },
+  };
+};

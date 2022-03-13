@@ -29,16 +29,13 @@ export function ResultsProvider({ children }: { children: JSX.Element }): any {
   const [email, setEmail] = useState('');
 
   const URL = process.env.URL || 'http://localhost:3333';
+  const storageEmail = () => localStorage.getItem('userEmail') || '';
 
   async function Authenticator() {
     const token = localStorage.getItem('tokenRt') || '';
-    const email = localStorage.getItem('userEmail') || '';
+    console.log(storageEmail());
 
-    if (!email) {
-      setAuthLoading(false);
-    }
-
-    const AuthResponse = await fetch(`${URL}/auth/refresh/${email}`, {
+    const AuthResponse = await fetch(`${URL}/auth/refresh/${storageEmail()}`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -53,16 +50,15 @@ export function ResultsProvider({ children }: { children: JSX.Element }): any {
       localStorage.setItem('tokenAt', acess_token);
       localStorage.setItem('tokenRt', refresh_token);
       localStorage.setItem('userEmail', email);
-      setEmail(email);
+      setEmail(storageEmail());
       setAuthorized(true);
     }
   }
 
   async function Logout() {
     const token = localStorage.getItem('tokenRt') || '';
-    const email = localStorage.getItem('userEmail') || '';
 
-    await fetch(`${URL}/auth/logout/${email}`, {
+    await fetch(`${URL}/auth/logout/${storageEmail()}`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -75,7 +71,9 @@ export function ResultsProvider({ children }: { children: JSX.Element }): any {
 
   useEffect(() => {
     const tokenRt = localStorage.getItem('tokenRt');
-
+    if (!storageEmail()) {
+      setAuthLoading(false);
+    }
     if (tokenRt) {
       Authenticator();
       setInterval(() => {

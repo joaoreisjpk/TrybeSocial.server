@@ -4,6 +4,7 @@ import { MouseEvent, useEffect, useState } from 'react';
 import Button from 'react-bootstrap/Button';
 import Container from 'react-bootstrap/Container';
 import Form from 'react-bootstrap/Form';
+import Cookie from 'js-cookie';
 
 import Header from '../../components/Header';
 import FormInput from './_formInput';
@@ -84,8 +85,9 @@ export default function Login() {
     };
 
     if (acess_token && email && refresh_token) {
-      localStorage.setItem('tokenAt', acess_token);
-      localStorage.setItem('tokenRt', refresh_token);
+      Cookie.set('tokenAt', acess_token);
+      Cookie.set('tokenRt', refresh_token);
+      Cookie.set('userEmail', email);
       localStorage.setItem('userEmail', email);
       setEmail(email);
       setAuthorized(true);
