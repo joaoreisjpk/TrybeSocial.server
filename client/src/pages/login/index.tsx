@@ -3,8 +3,6 @@ import { useRouter } from 'next/router';
 import { MouseEvent, useState } from 'react';
 import Button from 'react-bootstrap/Button';
 import Container from 'react-bootstrap/Container';
-// import Row from 'react-bootstrap/Row';
-// import Col from 'react-bootstrap/Col';
 import Form from 'react-bootstrap/Form';
 import Header from '../../components/Header';
 import FormInput from './_formInput';
@@ -56,19 +54,23 @@ export default function Login() {
       password,
     });
 
-    const response = (await fetch(`${URL}/auth/signin`, {
+    const { acess_token, refresh_token, error } = await fetch(`${URL}/auth/signin`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
       body: body,
-    }).then((data) => data.json())) as { acess_token: string } | any;
+    }).then((data) => data.json()) as {acess_token?: string, refresh_token?: string, error?: string}
 
-    if (response.acess_token) return push('/main-page');
-    // alert('acesso negado');
-    setUnauthotorized('Email ou Password incorretos');
-    setEmailCondition(INITIAL_CONDITION);
-    setPasswordCondition(INITIAL_CONDITION);
+    if (acess_token) {
+      localStorage.setItem('tokenAt', acess_token)
+      localStorage.setItem('tokenAt', refresh_token)
+      return push('/main-page');
+    } else {
+      setUnauthotorized(error || 'Algum erro ocorreu');
+      setEmailCondition(INITIAL_CONDITION);
+      setPasswordCondition(INITIAL_CONDITION);
+    }
   };
 
   return (
