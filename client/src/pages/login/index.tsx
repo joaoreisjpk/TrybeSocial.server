@@ -63,8 +63,8 @@ export default function Login() {
     }).then((data) => data.json()) as {acess_token?: string, refresh_token?: string, error?: string}
 
     if (acess_token) {
-      localStorage.setItem('tokenAt', acess_token)
-      localStorage.setItem('tokenAt', refresh_token)
+      localStorage.setItem('tokenAt', acess_token || '')
+      localStorage.setItem('tokenAt', refresh_token || '')
       return push('/main-page');
     } else {
       setUnauthotorized(error || 'Algum erro ocorreu');
