@@ -51,10 +51,12 @@ export class AuthService {
     if (!user) return { error: 'Email ou Senha incorretos' };
 
     const pwMatches = await argon.verify(user.hash, password);
-
     if (!pwMatches) return { error: 'Email ou Senha incorretos' };
 
-    return this.signToken(user.id, user.email);
+    const tokens = await this.getTokens(user.id, user.email);
+    await this.updateRtHash(user.id, tokens.refresh_token);
+
+    return tokens;
   }
 
   async getAll() {
@@ -63,26 +65,12 @@ export class AuthService {
 
   // TODO
   async logout(userId: number) {
-    await this.prisma.user.updateMany({
+    await this.prisma.user.update({
       where: {
         id: userId,
       },
       data: { tokenRt: null },
     });
-  }
-
-  async signToken(userId: number, email: string) {
-    const payload = {
-      sub: userId,
-      email,
-    };
-
-    const token = jwt.sign(payload, this.secret, {
-      algorithm: 'HS256',
-      expiresIn: '15min',
-    });
-
-    return { acess_token: token };
   }
 
   async refreshTokens(userId: number, rt: string) {
@@ -94,8 +82,7 @@ export class AuthService {
 
     if (!user || !user.tokenRt) return { error: 'Access Denied' };
 
-    const rtMatches = await argon.verify(rt, user.tokenRt);
-
+    const rtMatches = await argon.verify(user.tokenRt, rt);
     if (!rtMatches) return { error: 'Access Denied' };
 
     const tokens = await this.getTokens(user.id, user.email);
