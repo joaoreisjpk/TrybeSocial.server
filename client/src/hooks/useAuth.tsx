@@ -32,9 +32,8 @@ export function ResultsProvider({ children }: { children: JSX.Element }): any {
 
   storageEmail();
 
-  async function Authenticator() {
+  async function RefreshTokenFunction() {
     const token = Cookies.get('tokenRt') || '';
-    console.log(storageEmail());
 
     const AuthResponse = await fetch(`${URL}/auth/refresh/${storageEmail()}`, {
       method: 'POST',
@@ -73,7 +72,7 @@ export function ResultsProvider({ children }: { children: JSX.Element }): any {
     const tokenRt = Cookies.get('tokenRt');
     if (tokenRt) {
       setInterval(() => {
-        Authenticator();
+        RefreshTokenFunction();
       }, 1000 * 60 * 5); // 10min
     }
   }, []);
