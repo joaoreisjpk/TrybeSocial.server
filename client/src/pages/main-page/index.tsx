@@ -3,6 +3,7 @@ import Head from 'next/head';
 import React from 'react';
 import Header from '../../components/Header';
 import { fetchRefreshToken } from '../../helpers/fetchers';
+import JWT from '../../helpers/jwt';
 import { useAuth } from '../../hooks/useAuth';
 
 export default function MainPage() {
@@ -22,16 +23,20 @@ export default function MainPage() {
 }
 
 export const getServerSideProps: GetServerSideProps = async ({ req }) => {
-  const { tokenAt, tokenRt, userEmail } = req.cookies;
+  const { tokenAt, tokenRt } = req.cookies;
 
-  if (!tokenRt || !userEmail) {
+  if (!tokenRt) {
     return {
       props: {},
       redirect: {
         destination: '/login',
+        permanent: false,
       },
     };
   }
+
+  const jwt = new JWT();
+  const { email: userEmail } = jwt.decode(tokenAt)
 
   const tokens = await fetchRefreshToken(tokenRt, userEmail);
 
