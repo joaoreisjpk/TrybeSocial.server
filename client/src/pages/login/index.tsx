@@ -72,14 +72,13 @@ export default function Login() {
       password,
     });
 
-    const { acess_token, refresh_token, error, email } = await fetchLogin(body);
+    const { acess_token, refresh_token, error } = await fetchLogin(body);
 
-    if (acess_token && email && refresh_token) {
+    if (acess_token && refresh_token) {
       Cookie.set('tokenAt', acess_token);
       Cookie.set('tokenRt', refresh_token);
-      Cookie.set('userEmail', email);
-      localStorage.setItem('userEmail', email);
-      setEmail(email);
+      // const { email } = 
+      // setEmail(email);
       setAuthorized(true);
       return push('/main-page');
     } else {
