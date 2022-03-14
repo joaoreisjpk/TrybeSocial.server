@@ -10,13 +10,14 @@ import {
 import { CookieAt, CookieRt } from '../helpers/cookie';
 import JWT from '../helpers/jwt';
 import { fetchLogout, fetchRefreshToken } from '../helpers/fetchers';
+import { useRouter } from 'next/router';
 
 interface IContext {
   authorized: boolean;
   Logout: () => Promise<void>;
   setAuthorized: Dispatch<SetStateAction<boolean>>;
-  email: string | undefined;
-  setEmail: Dispatch<SetStateAction<string | undefined>>;
+  email: string;
+  setEmail: Dispatch<SetStateAction<string>>;
 }
 
 interface IProvider {
@@ -33,7 +34,9 @@ export const AuthContext = createContext(initialValues as IContext);
 
 export function ResultsProvider({ children }: IProvider) {
   const [authorized, setAuthorized] = useState(false);
-  const [email, setEmail] = useState(CookieAt.get('tokenAt'));
+  const [email, setEmail] = useState('');
+  const [intervalKey, setIntervalKey] = useState<NodeJS.Timer | boolean>(false);
+  const { pathname } = useRouter();
 
   useEffect(() => {
     const token = CookieAt.get('tokenAt');
@@ -70,12 +73,17 @@ export function ResultsProvider({ children }: IProvider) {
 
   useEffect(() => {
     const tokenRt = CookieRt.get('tokenRt');
-    if (tokenRt) {
-      setInterval(
+    if (pathname !== '/login' && tokenRt && !intervalKey) {
+      const intervalId = setInterval(
         RefreshTokenFunction, 1000 * 60 * 5 // 5min
       );
+      setIntervalKey(intervalId);
     }
-  }, []);
+    if (pathname === '/login' && intervalKey) {
+      clearInterval(intervalKey as NodeJS.Timeout);
+      setIntervalKey(false);
+    }
+  }, [pathname]);
 
   return (
     <AuthContext.Provider
