@@ -2,6 +2,7 @@ import { GetServerSideProps } from 'next';
 import Head from 'next/head';
 import React from 'react';
 import Header from '../../components/Header';
+import { fetchRefreshToken } from '../../helpers/fetchers';
 import { useAuth } from '../../hooks/useAuth';
 
 export default function MainPage() {
@@ -32,18 +33,7 @@ export const getServerSideProps: GetServerSideProps = async ({ req }) => {
     };
   }
 
-  const response = await fetch(
-    `http://localhost:3333/auth/refresh/${userEmail}`,
-    {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'token': tokenRt,
-      },
-    }
-  );
-
-  const tokens = await response.json();
+  const tokens = await fetchRefreshToken(tokenRt, userEmail);
 
   if (tokens.refresh_token)
     return {
@@ -54,6 +44,6 @@ export const getServerSideProps: GetServerSideProps = async ({ req }) => {
     };
 
   return {
-    props: { userEmail },
+    props: {},
   };
 };
