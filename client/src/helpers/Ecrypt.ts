@@ -5,6 +5,8 @@ type payloadType = {
   email: string;
 };
 
+const secret = process.env.JWT_SECRET || '';
+
 export default class JWT {
   private secret: string;
 
@@ -27,3 +29,13 @@ export default class JWT {
     return jwt.decode(token) as payloadType;
   }
 }
+
+// Encrypt
+export const encrypt = (message: string) =>
+  CryptoJS.AES.encrypt(message, secret).toString();
+
+// Decrypt
+export const decrypt = (message: string) => {
+  const bytes = CryptoJS.AES.decrypt(message, secret);
+  return bytes.toString(CryptoJS.enc.Utf8);
+};

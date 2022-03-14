@@ -3,7 +3,7 @@ import Head from 'next/head';
 import React from 'react';
 import Header from '../../components/Header';
 import { fetchRefreshToken } from '../../helpers/fetchers';
-import JWT from '../../helpers/jwt';
+import JWT, { encrypt } from '../../helpers/Ecrypt';
 import { useAuth } from '../../hooks/useAuth';
 
 export default function MainPage() {
@@ -23,7 +23,10 @@ export default function MainPage() {
 }
 
 export const getServerSideProps: GetServerSideProps = async ({ req }) => {
-  const { tokenAt, tokenRt } = req.cookies;
+  const cookies = req.cookies;
+
+  const tokenAt = cookies[encrypt('tokenAt')];
+  const tokenRt = cookies[encrypt('tokenRt')];
 
   if (!tokenRt) {
     return {
@@ -36,8 +39,11 @@ export const getServerSideProps: GetServerSideProps = async ({ req }) => {
   }
 
   const jwt = new JWT();
-  const { email: userEmail } = jwt.decode(tokenAt)
-  const { acess_token, refresh_token, error } = await fetchRefreshToken(tokenRt, userEmail);
+  const { email: userEmail } = jwt.decode(tokenAt);
+  const { acess_token, refresh_token, error } = await fetchRefreshToken(
+    tokenRt,
+    userEmail
+  );
 
   if (error) {
     return {

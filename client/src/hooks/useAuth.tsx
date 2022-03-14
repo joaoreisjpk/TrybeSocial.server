@@ -8,7 +8,7 @@ import {
 } from 'react';
 
 import { CookieAt, CookieRt } from '../helpers/cookie';
-import JWT from '../helpers/jwt';
+import JWT, { decrypt, encrypt } from '../helpers/Ecrypt';
 import { fetchLogout, fetchRefreshToken } from '../helpers/fetchers';
 import { useRouter } from 'next/router';
 
@@ -40,7 +40,7 @@ export function ResultsProvider({ children }: IProvider) {
   const FiveMin = 1000 * 60 * 5;
 
   useEffect(() => {
-    const token = CookieAt.get('tokenAt');
+    const token = decrypt(CookieRt.get(encrypt('tokenRt')) || '');
     if (token) {
       const { email } = jwt.verify(token);
       setEmail(email);
@@ -48,7 +48,7 @@ export function ResultsProvider({ children }: IProvider) {
   }, [authorized]);
 
   async function RefreshTokenFunction() {
-    const token = CookieRt.get('tokenRt') || '';
+    const token = decrypt(CookieRt.get(encrypt('tokenRt')) || '');
 
     const {
       acess_token,
@@ -56,15 +56,15 @@ export function ResultsProvider({ children }: IProvider) {
     } = await fetchRefreshToken(token, email);
 
     if (refresh_token && acess_token) {
-      CookieAt.set('tokenAt', acess_token);
-      CookieRt.set('tokenRt', refresh_token);
+      CookieAt.set(encrypt('tokenAt'), encrypt(acess_token));
+      CookieRt.set(encrypt('tokenRt'), encrypt(refresh_token));
       setAuthorized(true);
     }
   }
 
   async function Logout() {
-    CookieAt.remove('tokenAt');
-    CookieRt.remove('tokenRt');
+    CookieAt.remove(encrypt('tokenAt'));
+    CookieRt.remove(encrypt('tokenRt'));
     setAuthorized(false);
     setEmail('');
 
@@ -72,7 +72,7 @@ export function ResultsProvider({ children }: IProvider) {
   }
 
   useEffect(() => {
-    const tokenRt = CookieRt.get('tokenRt');
+    const tokenRt = decrypt(CookieRt.get(encrypt('tokenRt')) || '');
     if (pathname !== '/login' && tokenRt && !intervalKey) {
       const intervalId = setInterval(
         RefreshTokenFunction, FiveMin

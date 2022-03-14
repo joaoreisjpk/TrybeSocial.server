@@ -12,7 +12,7 @@ import FormInput from './_formInput';
 import * as Validation from '../../helpers/validation';
 import { useAuth } from '../../hooks/useAuth';
 import { fetchLogin } from '../../helpers/fetchers';
-import JWT from '../../helpers/jwt';
+import JWT, { encrypt } from '../../helpers/Ecrypt';
 
 const INITIAL_CONDITION = {
   valid: false,
@@ -62,8 +62,11 @@ export default function Login() {
   };
 
   const handleButtonDisable = () => {
-    return !!Validation.emailVerifier(user) || !!Validation.passwordVerifier(password);
-  }
+    return (
+      !!Validation.emailVerifier(user) ||
+      !!Validation.passwordVerifier(password)
+    );
+  };
 
   const handleClick = async (
     e: MouseEvent<HTMLButtonElement, globalThis.MouseEvent>
@@ -78,8 +81,8 @@ export default function Login() {
     const { acess_token, refresh_token, error } = await fetchLogin(body);
 
     if (acess_token && refresh_token) {
-      CookieAt.set('tokenAt', acess_token);
-      CookieRt.set('tokenRt', refresh_token);
+      CookieAt.set(encrypt('tokenAt'), encrypt(acess_token));
+      CookieRt.set(encrypt('tokenRt'), encrypt(refresh_token));
       const { email } = jwt.decode(acess_token);
       setEmail(email);
       setAuthorized(true);
@@ -152,9 +155,12 @@ export default function Login() {
 }
 
 export const getServerSideProps: GetServerSideProps = async ({ req }) => {
-  const { tokenAt, tokenRt, userEmail } = req.cookies;
+  const cookies = req.cookies;
 
-  if (tokenRt && userEmail) {
+  const tokenAt = cookies[encrypt('tokenAt')];
+  const tokenRt = cookies[encrypt('tokenRt')];
+
+  if (tokenRt) {
     return {
       props: {},
       redirect: {
