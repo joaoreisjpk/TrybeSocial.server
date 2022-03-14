@@ -58,6 +58,10 @@ export default function Login() {
     setPasswordCondition({ valid: true, invalid: false, msg: '' });
   };
 
+  const handleButtonDisable = () => {
+    return !!Validation.emailVerifier(user) || !!Validation.passwordVerifier(password);
+  }
+
   const handleClick = async (
     e: MouseEvent<HTMLButtonElement, globalThis.MouseEvent>
   ) => {
@@ -122,7 +126,7 @@ export default function Login() {
               size='lg'
               onClick={handleClick}
               type='submit'
-              disabled={!emailCondition.valid || !passwordCondition.valid}
+              disabled={handleButtonDisable()}
             >
               Login
             </Button>
