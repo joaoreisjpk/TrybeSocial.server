@@ -5,6 +5,7 @@ import {
   useEffect,
   Dispatch,
   SetStateAction,
+  useCallback,
 } from 'react';
 
 import { CookieAt, CookieRt } from '../helpers/cookie';
@@ -13,9 +14,7 @@ import { fetchLogout, fetchRefreshToken } from '../helpers/fetchers';
 import { useRouter } from 'next/router';
 
 interface IContext {
-  authorized: boolean;
   Logout: () => Promise<void>;
-  setAuthorized: Dispatch<SetStateAction<boolean>>;
   email: string;
   setEmail: Dispatch<SetStateAction<string>>;
 }
@@ -24,19 +23,14 @@ interface IProvider {
   children: JSX.Element | JSX.Element[];
 }
 
-const initialValues = {
-  authorized: false,
-};
-
 const jwt = new JWT();
 
-export const AuthContext = createContext(initialValues as IContext);
+export const AuthContext = createContext({} as IContext);
 
 export function ResultsProvider({ children }: IProvider) {
-  const [authorized, setAuthorized] = useState(false);
   const [email, setEmail] = useState('');
   const [intervalKey, setIntervalKey] = useState<NodeJS.Timer | boolean>(false);
-  const { pathname } = useRouter();
+  const { pathname, push } = useRouter();
   const FiveMin = 1000 * 60 * 5;
 
   useEffect(() => {
@@ -45,9 +39,9 @@ export function ResultsProvider({ children }: IProvider) {
       const { email } = jwt.verify(token);
       setEmail(email);
     }
-  }, [authorized]);
+  }, []);
 
-  async function RefreshTokenFunction() {
+  const RefreshTokenFunction = useCallback(async () => {
     const token = decrypt(CookieRt.get('tokenRt') || '');
 
     const { acess_token, refresh_token } = await fetchRefreshToken(
@@ -58,16 +52,14 @@ export function ResultsProvider({ children }: IProvider) {
     if (refresh_token && acess_token) {
       CookieAt.set('tokenAt', encrypt(acess_token));
       CookieRt.set('tokenRt', encrypt(refresh_token));
-      setAuthorized(true);
     }
-  }
+  }, [email]);
 
   async function Logout() {
     CookieAt.remove('tokenAt');
     CookieRt.remove('tokenRt');
-    setAuthorized(false);
     setEmail('');
-
+    push('/login');
     await fetchLogout(email);
   }
 
@@ -81,14 +73,12 @@ export function ResultsProvider({ children }: IProvider) {
       clearInterval(intervalKey as NodeJS.Timeout);
       setIntervalKey(false);
     }
-  }, [pathname]);
+  }, [pathname, FiveMin, RefreshTokenFunction, intervalKey]);
 
   return (
     <AuthContext.Provider
       value={{
-        authorized,
         Logout,
-        setAuthorized,
         email,
         setEmail,
       }}

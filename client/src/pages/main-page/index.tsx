@@ -3,7 +3,7 @@ import Head from 'next/head';
 import React from 'react';
 import Header from '../../components/Header';
 import { fetchRefreshToken } from '../../helpers/fetchers';
-import JWT, { decrypt, encrypt } from '../../helpers/Encrypt';
+import JWT, { decrypt } from '../../helpers/Encrypt';
 import { useAuth } from '../../hooks/useAuth';
 
 export default function MainPage() {

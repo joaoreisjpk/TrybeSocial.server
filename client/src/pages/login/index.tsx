@@ -1,7 +1,7 @@
 import Head from 'next/head';
 import { useRouter } from 'next/router';
 import { GetServerSideProps } from 'next';
-import { MouseEvent, useEffect, useState } from 'react';
+import { MouseEvent, useState } from 'react';
 import Button from 'react-bootstrap/Button';
 import Container from 'react-bootstrap/Container';
 import Form from 'react-bootstrap/Form';
@@ -23,17 +23,13 @@ const INITIAL_CONDITION = {
 const jwt = new JWT();
 
 export default function Login() {
-  const { push, replace } = useRouter();
+  const { push } = useRouter();
   const [user, setUser] = useState('');
   const [password, setPassword] = useState('');
   const [emailCondition, setEmailCondition] = useState(INITIAL_CONDITION);
   const [passwordCondition, setPasswordCondition] = useState(INITIAL_CONDITION);
   const [unauthorized, setUnauthotorized] = useState('');
-  const { authorized, setAuthorized, setEmail } = useAuth();
-
-  useEffect(() => {
-    if (authorized) replace('/main-page');
-  }, [authorized, replace]);
+  const { setEmail } = useAuth();
 
   const emailValidation = (emailValue: string) => {
     const emailResult = Validation.emailVerifier(emailValue);
@@ -80,14 +76,11 @@ export default function Login() {
 
     const { acess_token, refresh_token, error } = await fetchLogin(body);
 
-    console.log(acess_token, refresh_token);
     if (acess_token && refresh_token) {
       CookieAt.set('tokenAt', encrypt(acess_token));
       CookieRt.set('tokenRt', encrypt(refresh_token));
       const { email } = jwt.decode(acess_token);
-      console.log(email);
       setEmail(email);
-      setAuthorized(true);
       return push('/main-page');
     } else {
       setUnauthotorized(error || 'Algum erro ocorreu');
