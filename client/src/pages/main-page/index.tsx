@@ -37,16 +37,20 @@ export const getServerSideProps: GetServerSideProps = async ({ req }) => {
 
   const jwt = new JWT();
   const { email: userEmail } = jwt.decode(tokenAt)
+  const { acess_token, refresh_token, error } = await fetchRefreshToken(tokenRt, userEmail);
 
-  const tokens = await fetchRefreshToken(tokenRt, userEmail);
-
-  if (tokens.refresh_token)
+  if (error) {
     return {
       props: {},
       redirect: {
         destination: '/login',
+        permanent: false,
       },
     };
+  }
+
+  req.cookies.tokenRt = refresh_token as string;
+  req.cookies.tokenAt = acess_token as string;
 
   return {
     props: {},

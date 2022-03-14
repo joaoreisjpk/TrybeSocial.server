@@ -27,9 +27,8 @@ export class AuthController {
     return res.json(tokens);
   }
 
-  async logout(req: Request, res: Response) {
+  async logout(req: Request, _res: Response) {
     const { email } = req.params;
-    const tokens = await authService.logout(email);
-    return res.json(tokens);
+    await authService.logout(email);
   }
 }

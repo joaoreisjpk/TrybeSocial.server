@@ -1,10 +1,9 @@
-const URL = process.env.URL || 'http://localhost:3333';
+const URL = process.env.URL //|| 'http://localhost:3333';
 
 interface IuserTokenResponse {
   acess_token?: string;
   refresh_token?: string;
   error?: string;
-  email?: string;
 }
 
 export async function fetchLogin(body: string) {
@@ -19,7 +18,7 @@ export async function fetchLogin(body: string) {
 
 export async function fetchRefreshToken(
   token: string,
-  email: string | undefined
+  email: string,
 ) {
   return (await fetch(`${URL}/auth/refresh/${email}`, {
     method: 'POST',
@@ -30,12 +29,11 @@ export async function fetchRefreshToken(
   }).then((data) => data.json())) as IuserTokenResponse;
 }
 
-export async function fetchLogout(token: string, email: string | undefined) {
+export async function fetchLogout(email: string) {
   return fetch(`${URL}/auth/logout/${email}`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      'token': token,
     },
   });
 }

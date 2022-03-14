@@ -37,6 +37,7 @@ export function ResultsProvider({ children }: IProvider) {
   const [email, setEmail] = useState('');
   const [intervalKey, setIntervalKey] = useState<NodeJS.Timer | boolean>(false);
   const { pathname } = useRouter();
+  const FiveMin = 1000 * 60 * 5;
 
   useEffect(() => {
     const token = CookieAt.get('tokenAt');
@@ -62,20 +63,19 @@ export function ResultsProvider({ children }: IProvider) {
   }
 
   async function Logout() {
-    const token = CookieRt.get('tokenRt') || '';
-
-    await fetchLogout(token, email);
-
     CookieAt.remove('tokenAt');
     CookieRt.remove('tokenRt');
     setAuthorized(false);
+    setEmail('');
+
+    await fetchLogout(email);
   }
 
   useEffect(() => {
     const tokenRt = CookieRt.get('tokenRt');
     if (pathname !== '/login' && tokenRt && !intervalKey) {
       const intervalId = setInterval(
-        RefreshTokenFunction, 1000 * 60 * 5 // 5min
+        RefreshTokenFunction, FiveMin
       );
       setIntervalKey(intervalId);
     }

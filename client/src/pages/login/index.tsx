@@ -81,7 +81,6 @@ export default function Login() {
       CookieAt.set('tokenAt', acess_token);
       CookieRt.set('tokenRt', refresh_token);
       const { email } = jwt.decode(acess_token);
-      console.log({ email });
       setEmail(email);
       setAuthorized(true);
       return push('/main-page');

@@ -1,4 +1,5 @@
 import argon from 'argon2';
+import { v4 as uuid } from 'uuid';
 import { AuthDto } from './dto';
 import { PrismaClient } from '@prisma/client';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime';
@@ -50,7 +51,7 @@ export class AuthService {
       },
     });
 
-    if (!user) return { error: 'Usuário não encontrado' };
+    if (!user) return { error: 'Email ou Senha incorretos' };
 
     const pwMatches = await argon.verify(user.hash, password);
     if (!pwMatches) return { error: 'Email ou Senha incorretos' };
