@@ -12,7 +12,7 @@ import FormInput from './_formInput';
 import * as Validation from '../../helpers/validation';
 import { useAuth } from '../../hooks/useAuth';
 import { fetchLogin } from '../../helpers/fetchers';
-import JWT, { encrypt } from '../../helpers/Ecrypt';
+import JWT, { decrypt, encrypt } from '../../helpers/Encrypt';
 
 const INITIAL_CONDITION = {
   valid: false,
@@ -80,10 +80,12 @@ export default function Login() {
 
     const { acess_token, refresh_token, error } = await fetchLogin(body);
 
+    console.log(acess_token, refresh_token);
     if (acess_token && refresh_token) {
-      CookieAt.set(encrypt('tokenAt'), encrypt(acess_token));
-      CookieRt.set(encrypt('tokenRt'), encrypt(refresh_token));
+      CookieAt.set('tokenAt', encrypt(acess_token));
+      CookieRt.set('tokenRt', encrypt(refresh_token));
       const { email } = jwt.decode(acess_token);
+      console.log(email);
       setEmail(email);
       setAuthorized(true);
       return push('/main-page');
@@ -155,10 +157,10 @@ export default function Login() {
 }
 
 export const getServerSideProps: GetServerSideProps = async ({ req }) => {
-  const cookies = req.cookies;
+  const { tokenAt: AtEncrypted, tokenRt: RtEncrypted } = req.cookies;
 
-  const tokenAt = cookies[encrypt('tokenAt')];
-  const tokenRt = cookies[encrypt('tokenRt')];
+  const tokenAt = decrypt(AtEncrypted);
+  const tokenRt = decrypt(RtEncrypted);
 
   if (tokenRt) {
     return {

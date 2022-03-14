@@ -3,7 +3,7 @@ import Head from 'next/head';
 import React from 'react';
 import Header from '../../components/Header';
 import { fetchRefreshToken } from '../../helpers/fetchers';
-import JWT, { encrypt } from '../../helpers/Ecrypt';
+import JWT, { decrypt, encrypt } from '../../helpers/Encrypt';
 import { useAuth } from '../../hooks/useAuth';
 
 export default function MainPage() {
@@ -23,10 +23,12 @@ export default function MainPage() {
 }
 
 export const getServerSideProps: GetServerSideProps = async ({ req }) => {
-  const cookies = req.cookies;
+  const { tokenAt: AtCrypted, tokenRt: RtCrypted } = req.cookies;
 
-  const tokenAt = cookies[encrypt('tokenAt')];
-  const tokenRt = cookies[encrypt('tokenRt')];
+  const tokenAt = decrypt(AtCrypted);
+  const tokenRt = decrypt(RtCrypted);
+
+  console.log(tokenAt);
 
   if (!tokenRt) {
     return {

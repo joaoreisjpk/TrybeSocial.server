@@ -1,4 +1,5 @@
 import jwt from 'jsonwebtoken';
+import CryptoJS from 'crypto-js';
 
 type payloadType = {
   userId: number;
@@ -36,6 +37,6 @@ export const encrypt = (message: string) =>
 
 // Decrypt
 export const decrypt = (message: string) => {
-  const bytes = CryptoJS.AES.decrypt(message, secret);
+  const bytes = CryptoJS.AES.decrypt(message || '', secret);
   return bytes.toString(CryptoJS.enc.Utf8);
 };

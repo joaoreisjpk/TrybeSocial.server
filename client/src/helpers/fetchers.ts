@@ -7,13 +7,17 @@ interface IuserTokenResponse {
 }
 
 export async function fetchLogin(body: string) {
-  return fetch(`${URL}/auth/signin`, {
+  const response = (await fetch(`${URL}/auth/signin`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
     },
     body,
-  }).then((data) => data.json()) as IuserTokenResponse;
+  }).then((data) => data.json())) as IuserTokenResponse;
+
+  console.log(response);
+
+  return response;
 }
 
 export async function fetchRefreshToken(

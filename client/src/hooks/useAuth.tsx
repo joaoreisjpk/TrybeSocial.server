@@ -8,7 +8,7 @@ import {
 } from 'react';
 
 import { CookieAt, CookieRt } from '../helpers/cookie';
-import JWT, { decrypt, encrypt } from '../helpers/Ecrypt';
+import JWT, { decrypt, encrypt } from '../helpers/Encrypt';
 import { fetchLogout, fetchRefreshToken } from '../helpers/fetchers';
 import { useRouter } from 'next/router';
 
@@ -40,7 +40,7 @@ export function ResultsProvider({ children }: IProvider) {
   const FiveMin = 1000 * 60 * 5;
 
   useEffect(() => {
-    const token = decrypt(CookieRt.get(encrypt('tokenRt')) || '');
+    const token = decrypt(CookieRt.get('tokenRt') || '');
     if (token) {
       const { email } = jwt.verify(token);
       setEmail(email);
@@ -48,23 +48,23 @@ export function ResultsProvider({ children }: IProvider) {
   }, [authorized]);
 
   async function RefreshTokenFunction() {
-    const token = decrypt(CookieRt.get(encrypt('tokenRt')) || '');
+    const token = decrypt(CookieRt.get('tokenRt') || '');
 
-    const {
-      acess_token,
-      refresh_token,
-    } = await fetchRefreshToken(token, email);
+    const { acess_token, refresh_token } = await fetchRefreshToken(
+      token,
+      email
+    );
 
     if (refresh_token && acess_token) {
-      CookieAt.set(encrypt('tokenAt'), encrypt(acess_token));
-      CookieRt.set(encrypt('tokenRt'), encrypt(refresh_token));
+      CookieAt.set('tokenAt', encrypt(acess_token));
+      CookieRt.set('tokenRt', encrypt(refresh_token));
       setAuthorized(true);
     }
   }
 
   async function Logout() {
-    CookieAt.remove(encrypt('tokenAt'));
-    CookieRt.remove(encrypt('tokenRt'));
+    CookieAt.remove('tokenAt');
+    CookieRt.remove('tokenRt');
     setAuthorized(false);
     setEmail('');
 
@@ -72,11 +72,9 @@ export function ResultsProvider({ children }: IProvider) {
   }
 
   useEffect(() => {
-    const tokenRt = decrypt(CookieRt.get(encrypt('tokenRt')) || '');
+    const tokenRt = decrypt(CookieRt.get('tokenRt') || '');
     if (pathname !== '/login' && tokenRt && !intervalKey) {
-      const intervalId = setInterval(
-        RefreshTokenFunction, FiveMin
-      );
+      const intervalId = setInterval(RefreshTokenFunction, FiveMin);
       setIntervalKey(intervalId);
     }
     if (pathname === '/login' && intervalKey) {
