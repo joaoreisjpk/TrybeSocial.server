@@ -1,13 +1,12 @@
 import '../styles/globals.css';
 import 'bootstrap/dist/css/bootstrap.css';
 import type { AppProps } from 'next/app';
-import { AuthContext, ResultsProvider } from '../hooks/useAuth';
-import AuthHandler from './_authHandler';
+import { ResultsProvider } from '../hooks/useAuth';
 
-function MyApp(param: AppProps) {
+function MyApp({ Component, pageProps }: AppProps) {
   return (
     <ResultsProvider>
-      <AuthHandler {...param} />
+      <Component {...pageProps} />
     </ResultsProvider>
   );
 }

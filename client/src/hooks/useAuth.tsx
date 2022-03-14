@@ -18,13 +18,17 @@ interface IContext {
   setEmail: Dispatch<SetStateAction<string | undefined>>;
 }
 
+interface IProvider {
+  children: JSX.Element | JSX.Element[];
+}
+
 const initialValues = {
   authorized: false,
 };
 
 export const AuthContext = createContext(initialValues as IContext);
 
-export function ResultsProvider({ children }: { children: JSX.Element }): any {
+export function ResultsProvider({ children }: IProvider) {
   const [authorized, setAuthorized] = useState(false);
   const [email, setEmail] = useState(Cookies.get('tokenRt'));
 

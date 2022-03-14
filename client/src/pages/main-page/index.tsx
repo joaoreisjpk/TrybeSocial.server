@@ -1,7 +1,6 @@
 import { GetServerSideProps } from 'next';
 import Head from 'next/head';
-import { useRouter } from 'next/router';
-import React, { useEffect } from 'react';
+import React from 'react';
 import Header from '../../components/Header';
 import { useAuth } from '../../hooks/useAuth';
 
