@@ -11,6 +11,7 @@ import FormInput from './_formInput';
 import * as Validation from '../../helpers/validation';
 import { useAuth } from '../../hooks/useAuth';
 import { fetchLogin } from '../../helpers/fetchers';
+import { GetServerSideProps } from 'next';
 
 const INITIAL_CONDITION = {
   valid: false,
@@ -143,3 +144,20 @@ export default function Login() {
     </div>
   );
 }
+
+export const getServerSideProps: GetServerSideProps = async ({ req }) => {
+  const { tokenAt, tokenRt, userEmail } = req.cookies;
+
+  if (tokenRt && userEmail) {
+    return {
+      props: {},
+      redirect: {
+        destination: '/main-page',
+      },
+    };
+  }
+
+  return {
+    props: {},
+  };
+};
