@@ -10,6 +10,7 @@ import Header from '../../components/Header';
 import FormInput from './_formInput';
 import * as Validation from '../../helpers/validation';
 import { useAuth } from '../../hooks/useAuth';
+import { fetchLogin } from '../../helpers/fetchers';
 
 const INITIAL_CONDITION = {
   valid: false,
@@ -61,28 +62,12 @@ export default function Login() {
   ) => {
     e.preventDefault();
 
-    const URL = process.env.URL || 'http://localhost:3333';
-
     const body = JSON.stringify({
       email: user,
       password,
     });
 
-    const { acess_token, refresh_token, error, email } = (await fetch(
-      `${URL}/auth/signin`,
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: body,
-      }
-    ).then((data) => data.json())) as {
-      acess_token?: string;
-      refresh_token?: string;
-      error?: string;
-      email?: string;
-    };
+    const { acess_token, refresh_token, error, email } = await fetchLogin(body);
 
     if (acess_token && email && refresh_token) {
       Cookie.set('tokenAt', acess_token);

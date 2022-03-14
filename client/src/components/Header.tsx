@@ -4,7 +4,6 @@ import Link from './Link';
 import NextLink from 'next/link';
 import { useAuth } from '../hooks/useAuth';
 import { useRouter } from 'next/router';
-import Cookies from 'js-cookie';
 
 export default function Header() {
   const { Logout } = useAuth();
@@ -12,8 +11,6 @@ export default function Header() {
 
   const handleClick = async () => {
     await Logout();
-    Cookies.remove('tokenAt');
-    Cookies.remove('tokenRt');
     push('/login');
   };
 

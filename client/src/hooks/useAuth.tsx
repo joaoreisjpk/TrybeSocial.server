@@ -8,6 +8,7 @@ import {
 } from 'react';
 
 import Cookies from 'js-cookie';
+import { fetchLogout, fetchRefreshToken } from '../helpers/fetchers';
 
 interface IContext {
   authorized: boolean;
@@ -23,63 +24,39 @@ const initialValues = {
 
 export const AuthContext = createContext(initialValues as IContext);
 
-const storageEmail = () => Cookies.get('userEmail');
-
 export function ResultsProvider({ children }: { children: JSX.Element }): any {
   const [authorized, setAuthorized] = useState(false);
-  const [email, setEmail] = useState(storageEmail());
-  const URL = process.env.URL || 'http://localhost:3333';
+  const [email, setEmail] = useState(Cookies.get('tokenRt'));
 
-  storageEmail();
+  useEffect(() => {
+    setEmail(Cookies.get('userEmail'));
+  }, [authorized]);
 
   async function RefreshTokenFunction() {
     const token = Cookies.get('tokenRt') || '';
 
-    const AuthResponse = await fetch(`${URL}/auth/refresh/${storageEmail()}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'token': token,
-      },
-    }).then((data) => data.json());
-
-    const { acess_token, refresh_token, email: userEmail } = AuthResponse;
+    const {
+      acess_token,
+      refresh_token,
+      email: userEmail,
+    } = await fetchRefreshToken(token, email);
 
     if (refresh_token && userEmail && acess_token) {
       Cookies.set('tokenAt', acess_token);
       Cookies.set('tokenRt', refresh_token);
       Cookies.set('userEmail', userEmail);
-      setEmail(storageEmail());
       setAuthorized(true);
     }
-  }
-
-  async function fetchLogin(body) {
-    return fetch(`${URL}/auth/signin`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body,
-    }).then((data) => data.json()) as {
-      acess_token?: string;
-      refresh_token?: string;
-      error?: string;
-      email?: string;
-    };
   }
 
   async function Logout() {
     const token = Cookies.get('tokenRt') || '';
 
-    await fetch(`${URL}/auth/logout/${storageEmail()}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'token': token,
-      },
-    });
+    await fetchLogout(token, email);
 
+    Cookies.remove('tokenAt');
+    Cookies.remove('tokenRt');
+    Cookies.remove('userEmail');
     setAuthorized(false);
   }
 
@@ -88,7 +65,7 @@ export function ResultsProvider({ children }: { children: JSX.Element }): any {
     if (tokenRt) {
       setInterval(() => {
         RefreshTokenFunction();
-      }, 1000 * 60 * 5); // 10min
+      }, 1000 * 60 * 5); // 5min
     }
   }, []);
 
