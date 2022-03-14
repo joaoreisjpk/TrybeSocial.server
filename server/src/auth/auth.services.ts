@@ -2,7 +2,9 @@ import argon from 'argon2';
 import { AuthDto } from './dto';
 import { PrismaClient } from '@prisma/client';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime';
-import jwt from 'jsonwebtoken';
+import JWT from 'src/helpers/jwt';
+
+const jwt = new JWT();
 
 export class AuthService {
   prisma: PrismaClient;
@@ -48,7 +50,7 @@ export class AuthService {
       },
     });
 
-    if (!user) return { error: 'Email ou Senha incorretos' };
+    if (!user) return { error: 'Usuário não encontrado' };
 
     const pwMatches = await argon.verify(user.hash, password);
     if (!pwMatches) return { error: 'Email ou Senha incorretos' };
@@ -106,23 +108,17 @@ export class AuthService {
 
   async getTokens(userId: number, email: string) {
     const payload = {
-      sub: userId,
+      userId,
       email,
     };
 
-    const at = jwt.sign(payload, this.secret, {
-      algorithm: 'HS256',
-      expiresIn: '15min',
-    });
+    const acess_token = jwt.sign(payload, '15min');
 
-    const rt = jwt.sign(payload, this.secret, {
-      algorithm: 'HS256',
-      expiresIn: '7d',
-    });
+    const refresh_token = jwt.sign(payload, '7d');
 
     return {
-      acess_token: at,
-      refresh_token: rt,
+      acess_token,
+      refresh_token,
     };
   }
 }
