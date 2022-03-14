@@ -7,7 +7,8 @@ import {
   SetStateAction,
 } from 'react';
 
-import Cookies from 'js-cookie';
+import { CookieAt, CookieRt } from '../helpers/cookie';
+import JWT from '../helpers/jwt';
 import { fetchLogout, fetchRefreshToken } from '../helpers/fetchers';
 
 interface IContext {
@@ -26,50 +27,50 @@ const initialValues = {
   authorized: false,
 };
 
+const jwt = new JWT();
+
 export const AuthContext = createContext(initialValues as IContext);
 
 export function ResultsProvider({ children }: IProvider) {
   const [authorized, setAuthorized] = useState(false);
-  const [email, setEmail] = useState(Cookies.get('tokenRt'));
+  const [email, setEmail] = useState(CookieAt.get('tokenAt'));
 
   useEffect(() => {
-    setEmail(Cookies.get('userEmail'));
+    const { email } = jwt.verify(CookieAt.get('tokenAt') as string);
+    setEmail(email);
   }, [authorized]);
 
   async function RefreshTokenFunction() {
-    const token = Cookies.get('tokenRt') || '';
+    const token = CookieRt.get('tokenRt') || '';
 
     const {
       acess_token,
       refresh_token,
-      email: userEmail,
     } = await fetchRefreshToken(token, email);
 
-    if (refresh_token && userEmail && acess_token) {
-      Cookies.set('tokenAt', acess_token);
-      Cookies.set('tokenRt', refresh_token);
-      Cookies.set('userEmail', userEmail);
+    if (refresh_token && acess_token) {
+      CookieAt.set('tokenAt', acess_token);
+      CookieRt.set('tokenRt', refresh_token);
       setAuthorized(true);
     }
   }
 
   async function Logout() {
-    const token = Cookies.get('tokenRt') || '';
+    const token = CookieRt.get('tokenRt') || '';
 
     await fetchLogout(token, email);
 
-    Cookies.remove('tokenAt');
-    Cookies.remove('tokenRt');
-    Cookies.remove('userEmail');
+    CookieAt.remove('tokenAt');
+    CookieRt.remove('tokenRt');
     setAuthorized(false);
   }
 
   useEffect(() => {
-    const tokenRt = Cookies.get('tokenRt');
+    const tokenRt = CookieRt.get('tokenRt');
     if (tokenRt) {
-      setInterval(() => {
-        RefreshTokenFunction();
-      }, 1000 * 60 * 5); // 5min
+      setInterval(
+        RefreshTokenFunction, 1000 * 60 * 5 // 5min
+      );
     }
   }, []);
 

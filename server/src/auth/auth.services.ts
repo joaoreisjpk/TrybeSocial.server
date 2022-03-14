@@ -2,9 +2,9 @@ import argon from 'argon2';
 import { AuthDto } from './dto';
 import { PrismaClient } from '@prisma/client';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime';
-import JWT from 'src/helpers/jwt';
+import JWToken from '../helpers/jwt';
 
-const jwt = new JWT();
+const jwt = new JWToken();
 
 export class AuthService {
   prisma: PrismaClient;
@@ -114,7 +114,7 @@ export class AuthService {
 
     const acess_token = jwt.sign(payload, '15min');
 
-    const refresh_token = jwt.sign(payload, '7d');
+    const refresh_token = jwt.sign(payload, '3d');
 
     return {
       acess_token,

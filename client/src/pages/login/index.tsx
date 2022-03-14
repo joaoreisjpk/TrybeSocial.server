@@ -1,23 +1,26 @@
 import Head from 'next/head';
 import { useRouter } from 'next/router';
+import { GetServerSideProps } from 'next';
 import { MouseEvent, useEffect, useState } from 'react';
 import Button from 'react-bootstrap/Button';
 import Container from 'react-bootstrap/Container';
 import Form from 'react-bootstrap/Form';
-import Cookie from 'js-cookie';
+import { CookieAt, CookieRt } from '../../helpers/cookie';
 
 import Header from '../../components/Header';
 import FormInput from './_formInput';
 import * as Validation from '../../helpers/validation';
 import { useAuth } from '../../hooks/useAuth';
 import { fetchLogin } from '../../helpers/fetchers';
-import { GetServerSideProps } from 'next';
+import JWT from '../../helpers/jwt';
 
 const INITIAL_CONDITION = {
   valid: false,
   invalid: false,
   msg: '',
 };
+
+const jwt = new JWT();
 
 export default function Login() {
   const { push, replace } = useRouter();
@@ -75,10 +78,11 @@ export default function Login() {
     const { acess_token, refresh_token, error } = await fetchLogin(body);
 
     if (acess_token && refresh_token) {
-      Cookie.set('tokenAt', acess_token);
-      Cookie.set('tokenRt', refresh_token);
-      // const { email } = 
-      // setEmail(email);
+      CookieAt.set('tokenAt', acess_token);
+      CookieRt.set('tokenRt', refresh_token);
+      const { email } = jwt.decode(acess_token);
+      console.log({ email });
+      setEmail(email);
       setAuthorized(true);
       return push('/main-page');
     } else {

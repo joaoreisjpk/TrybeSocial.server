@@ -1,5 +1,4 @@
 import jwt from 'jsonwebtoken';
-import 'dotenv/config';
 
 type payloadType = {
   userId: number;
@@ -10,7 +9,7 @@ export default class JWT {
   private secret: string;
 
   constructor() {
-    this.secret = process.env.JWT_SECRET as string;
+    this.secret = process.env.NEXT_PUBLIC_JWT_SECRET as string;
   }
 
   sign(payload: payloadType, expiresIn: string) {
@@ -21,10 +20,10 @@ export default class JWT {
   }
 
   verify(token: string) {
-    return jwt.verify(token, this.secret);
+    return jwt.verify(token, this.secret) as payloadType;
   }
 
   decode(token: string) {
-    return jwt.decode(token);
+    return jwt.decode(token) as payloadType;
   }
 }
