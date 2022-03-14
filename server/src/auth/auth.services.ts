@@ -58,7 +58,7 @@ export class AuthService {
     const tokens = await this.getTokens(user.id, user.email);
     await this.updateRtHash(user.id, tokens.refresh_token);
 
-    return { ...tokens, email: user.email };
+    return tokens;
   }
 
   async getAll() {
@@ -82,16 +82,16 @@ export class AuthService {
       },
     });
 
-    if (!user || !user.tokenRt) return { error: 'Access Denied' };
+    if (!user || !user.tokenRt) return { error: 'Accesso Negado' };
 
     const rtMatches = await argon.verify(user.tokenRt, rt);
-    if (!rtMatches) return { error: 'Access Denied' };
+    if (!rtMatches) return { error: 'Accesso Negado' };
 
     const tokens = await this.getTokens(user.id, user.email);
 
     await this.updateRtHash(user.id, tokens.refresh_token);
 
-    return { ...tokens, email: user.email };
+    return tokens;
   }
 
   async updateRtHash(userId: number, rt: string) {
