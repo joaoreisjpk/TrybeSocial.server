@@ -36,8 +36,11 @@ export function ResultsProvider({ children }: IProvider) {
   const [email, setEmail] = useState(CookieAt.get('tokenAt'));
 
   useEffect(() => {
-    const { email } = jwt.verify(CookieAt.get('tokenAt') as string);
-    setEmail(email);
+    const token = CookieAt.get('tokenAt');
+    if (token) {
+      const { email } = jwt.verify(token);
+      setEmail(email);
+    }
   }, [authorized]);
 
   async function RefreshTokenFunction() {
