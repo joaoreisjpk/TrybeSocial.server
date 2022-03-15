@@ -9,8 +9,7 @@ import { CookieAt, CookieRt } from '../../helpers/cookie';
 
 export default function MainPage(props: { email: string }) {
   const { email, setEmail } = useAuth();
-  if (email === '') {setEmail(props.email); console.log('email = ""');
-  };
+  if (email === '') { setEmail(props.email); console.log('email = ""'); };
 
   return (
     <div>
@@ -28,7 +27,7 @@ export default function MainPage(props: { email: string }) {
 
 export const getServerSideProps: GetServerSideProps = async ({ req }) => {
   const { tokenAt, tokenRt: RtCrypted } = req.cookies;
-  let AtCrypted = tokenAt;
+  let AtCrypted = tokenAt ? decrypt(tokenAt) : undefined;
   
   if (!RtCrypted) {
     return {
@@ -49,6 +48,8 @@ export const getServerSideProps: GetServerSideProps = async ({ req }) => {
       tokenRt,
       userId
     );
+    console.log({ userId, acess_token, refresh_token, error });
+    
 
     if (error) {
       CookieRt.remove('tokenRt');
@@ -65,8 +66,9 @@ export const getServerSideProps: GetServerSideProps = async ({ req }) => {
     CookieAt.set('tokenAt', encrypt(acess_token as string));
     AtCrypted = acess_token as string;
   }
-
-  const { email } = jwt.decode(decrypt(AtCrypted)) as { email: string };
+  console.log({ OK: AtCrypted });
+  
+  const { email } = jwt.decode(AtCrypted) as { email: string };
 
   return {
     props: { email },

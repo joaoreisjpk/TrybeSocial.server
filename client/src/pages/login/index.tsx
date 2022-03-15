@@ -79,7 +79,7 @@ export default function Login() {
     if (acess_token && refresh_token) {
       CookieAt.set('tokenAt', encrypt(acess_token));
       CookieRt.set('tokenRt', encrypt(refresh_token));
-      const { email } = jwt.decode(acess_token);
+      const { email } = jwt.decode(acess_token) as { email: string };
       setEmail(email);
       return push('/main-page');
     } else {

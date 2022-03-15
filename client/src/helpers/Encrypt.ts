@@ -39,7 +39,7 @@ export const decrypt = (message: string) => {
 };
 
 // GetId
-export const getTokenId = (token: string) => {
-  const id = token.match(/\d+/) as number[] | null;
+export const getTokenId = ({ payload }: string) => {
+  const id = payload.match(/\d+/) as number[] | null;
   return id ? id[0] : 0;
 }
