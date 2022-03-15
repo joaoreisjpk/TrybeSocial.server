@@ -8,11 +8,15 @@ import {
   useCallback,
 } from 'react';
 
-import { CookieAt, CookieRt } from '../helpers/cookie';
-import JWT, { decrypt, encrypt, getTokenId } from '../helpers/Encrypt';
+import JWT, { getTokenId } from '../helpers/Encrypt';
 import { fetchLogout, fetchRefreshToken } from '../helpers/fetchers';
 import { useRouter } from 'next/router';
-
+import {
+  getCookie,
+  destroyCookie,
+  setCookieAt,
+  setCookieRt,
+} from '../helpers/cookie';
 interface IContext {
   Logout: () => Promise<void>;
   email: string;
@@ -33,43 +37,34 @@ export function ResultsProvider({ children }: IProvider) {
   const { pathname, push } = useRouter();
   const FiveMin = 1000 * 60 * 5;
 
-  // useEffect(() => {
-  //   const token = decrypt(CookieRt.get('tokenRt') || '');
-  //   if (token) {
-  //     const { email } = jwt.verify(token);
-  //     setEmail(email);
-  //   }
-  // }, []);
-
   const RefreshTokenFunction = useCallback(async () => {
-    const token = decrypt(CookieRt.get('tokenRt') || '');
+    const token = getCookie('tokenRt');
     const userId = getTokenId(jwt.verify(token) as string);
+    console.log(userId);
     const { acess_token, refresh_token, error } = await fetchRefreshToken(
       token,
       userId
     );
 
-    if (error) {
-      CookieRt.remove('tokenRt');
-      return push('/login')
-    };
-
     if (refresh_token && acess_token) {
-      CookieAt.set('tokenAt', encrypt(acess_token));
-      CookieRt.set('tokenRt', encrypt(refresh_token));
+      setCookieAt('tokenAt', acess_token);
+      setCookieRt('tokenRt', refresh_token);
+    } else {
+      destroyCookie('tokenRt');
+      return push('/login');
     }
-  }, [email]);
+  }, [push]);
 
   async function Logout() {
-    CookieAt.remove('tokenAt');
-    CookieRt.remove('tokenRt');
+    destroyCookie('tokenAt');
+    destroyCookie('tokenRt');
     setEmail('');
     push('/login');
     await fetchLogout(email);
   }
 
   useEffect(() => {
-    const tokenRt = decrypt(CookieRt.get('tokenRt') || '');
+    const tokenRt = getCookie('tokenRt');
     if (pathname !== '/login' && tokenRt && !intervalKey) {
       const intervalId = setInterval(RefreshTokenFunction, FiveMin);
       setIntervalKey(intervalId);

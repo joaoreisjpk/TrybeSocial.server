@@ -1,11 +1,23 @@
-import Cookie from 'js-cookie';
+import {
+  setCookie,
+  parseCookies,
+  destroyCookie as destroyNookie,
+} from 'nookies';
+import { decrypt, encrypt } from './Encrypt';
 
-export const CookieAt = Cookie.withAttributes({
-  expires: 1 / 48,
-  secure: process.env.NODE_ENV === 'production',
-});
+export const setCookieAt = (name: string, value: any) =>
+  setCookie(undefined, name, encrypt(value), { maxAge: 60 * 30 /* 30min */ });
 
-export const CookieRt = Cookie.withAttributes({
-  expires: 3,
-  secure: process.env.NODE_ENV === 'production',
-});
+export const setCookieRt = (name: string, value: any) =>
+  setCookie(undefined, name, encrypt(value), {
+    maxAge: 60 * 60 * 24 * 7 /* 7d */,
+  });
+
+export const getCookie = (name: string) => {
+  const { [name]: cookie } = parseCookies();
+  return decrypt(cookie);
+};
+
+export const destroyCookie = (name: string) => {
+  destroyNookie(undefined, name);
+};
