@@ -1,13 +1,27 @@
 import { GetServerSideProps } from 'next';
 import Head from 'next/head';
-import React from 'react';
+import React, { useEffect } from 'react';
 import Header from '../../components/Header';
 import { fetchRefreshToken } from '../../helpers/fetchers';
-import JWT, { decrypt } from '../../helpers/Encrypt';
+import JWT, { decrypt, encrypt } from '../../helpers/Encrypt';
 import { useAuth } from '../../hooks/useAuth';
+import { CookieAt, CookieRt } from '../../helpers/cookie';
 
-export default function MainPage() {
+interface ITokens {
+  tokens: {
+    tokenAt: string;
+    tokenRt: string;
+  };
+}
+
+export default function MainPage({ tokens }: ITokens) {
   const { email } = useAuth();
+
+  useEffect(() => {
+    CookieAt.set('tokenAt', encrypt(tokens.tokenAt));
+    CookieRt.set('tokenRt', encrypt(tokens.tokenRt));
+  }, []);
+
   return (
     <div>
       <Head>
@@ -59,10 +73,12 @@ export const getServerSideProps: GetServerSideProps = async ({ req }) => {
     };
   }
 
-  req.cookies.tokenRt = refresh_token as string;
-  req.cookies.tokenAt = acess_token as string;
-
   return {
-    props: {},
+    props: {
+      tokens: {
+        tokenAt: acess_token,
+        tokenRt: refresh_token,
+      },
+    },
   };
 };
