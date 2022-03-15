@@ -3,15 +3,12 @@ import { Button, Container, Nav, Navbar } from 'react-bootstrap';
 import Link from './Link';
 import NextLink from 'next/link';
 import { useAuth } from '../hooks/useAuth';
-import { useRouter } from 'next/router';
 
 export default function Header() {
   const { Logout } = useAuth();
-  const { push } = useRouter();
 
   const handleClick = async () => {
     await Logout();
-    push('/login');
   };
 
   return (

@@ -5,80 +5,85 @@ import {
   useEffect,
   Dispatch,
   SetStateAction,
+  useCallback,
 } from 'react';
 
-import Cookies from 'js-cookie';
+import { CookieAt, CookieRt } from '../helpers/cookie';
+import JWT, { decrypt, encrypt, getTokenId } from '../helpers/Encrypt';
 import { fetchLogout, fetchRefreshToken } from '../helpers/fetchers';
+import { useRouter } from 'next/router';
 
 interface IContext {
-  authorized: boolean;
   Logout: () => Promise<void>;
-  setAuthorized: Dispatch<SetStateAction<boolean>>;
-  email: string | undefined;
-  setEmail: Dispatch<SetStateAction<string | undefined>>;
+  email: string;
+  setEmail: Dispatch<SetStateAction<string>>;
 }
 
 interface IProvider {
   children: JSX.Element | JSX.Element[];
 }
 
-const initialValues = {
-  authorized: false,
-};
+const jwt = new JWT();
 
-export const AuthContext = createContext(initialValues as IContext);
+export const AuthContext = createContext({} as IContext);
 
 export function ResultsProvider({ children }: IProvider) {
-  const [authorized, setAuthorized] = useState(false);
-  const [email, setEmail] = useState(Cookies.get('tokenRt'));
+  const [email, setEmail] = useState('');
+  const [intervalKey, setIntervalKey] = useState<NodeJS.Timer | boolean>(false);
+  const { pathname, push } = useRouter();
+  const FiveMin = 1000 * 60 * 5;
 
-  useEffect(() => {
-    setEmail(Cookies.get('userEmail'));
-  }, [authorized]);
+  // useEffect(() => {
+  //   const token = decrypt(CookieRt.get('tokenRt') || '');
+  //   if (token) {
+  //     const { email } = jwt.verify(token);
+  //     setEmail(email);
+  //   }
+  // }, []);
 
-  async function RefreshTokenFunction() {
-    const token = Cookies.get('tokenRt') || '';
+  const RefreshTokenFunction = useCallback(async () => {
+    const token = decrypt(CookieRt.get('tokenRt') || '');
+    const userId = getTokenId(jwt.verify(token) as string);
+    const { acess_token, refresh_token, error } = await fetchRefreshToken(
+      token,
+      userId
+    );
 
-    const {
-      acess_token,
-      refresh_token,
-      email: userEmail,
-    } = await fetchRefreshToken(token, email);
+    if (error) {
+      CookieRt.remove('tokenRt');
+      return push('/login')
+    };
 
-    if (refresh_token && userEmail && acess_token) {
-      Cookies.set('tokenAt', acess_token);
-      Cookies.set('tokenRt', refresh_token);
-      Cookies.set('userEmail', userEmail);
-      setAuthorized(true);
+    if (refresh_token && acess_token) {
+      CookieAt.set('tokenAt', encrypt(acess_token));
+      CookieRt.set('tokenRt', encrypt(refresh_token));
     }
-  }
+  }, [email]);
 
   async function Logout() {
-    const token = Cookies.get('tokenRt') || '';
-
-    await fetchLogout(token, email);
-
-    Cookies.remove('tokenAt');
-    Cookies.remove('tokenRt');
-    Cookies.remove('userEmail');
-    setAuthorized(false);
+    CookieAt.remove('tokenAt');
+    CookieRt.remove('tokenRt');
+    setEmail('');
+    push('/login');
+    await fetchLogout(email);
   }
 
   useEffect(() => {
-    const tokenRt = Cookies.get('tokenRt');
-    if (tokenRt) {
-      setInterval(() => {
-        RefreshTokenFunction();
-      }, 1000 * 60 * 5); // 5min
+    const tokenRt = decrypt(CookieRt.get('tokenRt') || '');
+    if (pathname !== '/login' && tokenRt && !intervalKey) {
+      const intervalId = setInterval(RefreshTokenFunction, FiveMin);
+      setIntervalKey(intervalId);
     }
-  }, []);
+    if (pathname === '/login' && intervalKey) {
+      clearInterval(intervalKey as NodeJS.Timeout);
+      setIntervalKey(false);
+    }
+  }, [pathname, FiveMin, RefreshTokenFunction, intervalKey]);
 
   return (
     <AuthContext.Provider
       value={{
-        authorized,
         Logout,
-        setAuthorized,
         email,
         setEmail,
       }}

@@ -1,17 +1,18 @@
 import Head from 'next/head';
 import { useRouter } from 'next/router';
-import { MouseEvent, useEffect, useState } from 'react';
+import { GetServerSideProps } from 'next';
+import { MouseEvent, useState } from 'react';
 import Button from 'react-bootstrap/Button';
 import Container from 'react-bootstrap/Container';
 import Form from 'react-bootstrap/Form';
-import Cookie from 'js-cookie';
 
+import { CookieAt, CookieRt } from '../../helpers/cookie';
 import Header from '../../components/Header';
 import FormInput from './_formInput';
 import * as Validation from '../../helpers/validation';
 import { useAuth } from '../../hooks/useAuth';
 import { fetchLogin } from '../../helpers/fetchers';
-import { GetServerSideProps } from 'next';
+import JWT, { decrypt, encrypt } from '../../helpers/Encrypt';
 
 const INITIAL_CONDITION = {
   valid: false,
@@ -19,18 +20,16 @@ const INITIAL_CONDITION = {
   msg: '',
 };
 
+const jwt = new JWT();
+
 export default function Login() {
-  const { push, replace } = useRouter();
+  const { push } = useRouter();
   const [user, setUser] = useState('');
   const [password, setPassword] = useState('');
   const [emailCondition, setEmailCondition] = useState(INITIAL_CONDITION);
   const [passwordCondition, setPasswordCondition] = useState(INITIAL_CONDITION);
   const [unauthorized, setUnauthotorized] = useState('');
-  const { authorized, setAuthorized, setEmail } = useAuth();
-
-  useEffect(() => {
-    if (authorized) replace('/main-page');
-  }, [authorized, replace]);
+  const { setEmail } = useAuth();
 
   const emailValidation = (emailValue: string) => {
     const emailResult = Validation.emailVerifier(emailValue);
@@ -58,6 +57,13 @@ export default function Login() {
     setPasswordCondition({ valid: true, invalid: false, msg: '' });
   };
 
+  const handleButtonDisable = () => {
+    return (
+      !!Validation.emailVerifier(user) ||
+      !!Validation.passwordVerifier(password)
+    );
+  };
+
   const handleClick = async (
     e: MouseEvent<HTMLButtonElement, globalThis.MouseEvent>
   ) => {
@@ -65,18 +71,16 @@ export default function Login() {
 
     const body = JSON.stringify({
       email: user,
-      password,
+      password: encrypt(password),
     });
 
-    const { acess_token, refresh_token, error, email } = await fetchLogin(body);
-
-    if (acess_token && email && refresh_token) {
-      Cookie.set('tokenAt', acess_token);
-      Cookie.set('tokenRt', refresh_token);
-      Cookie.set('userEmail', email);
-      localStorage.setItem('userEmail', email);
+    const { acess_token, refresh_token, error } = await fetchLogin(body);
+    
+    if (acess_token && refresh_token) {
+      CookieAt.set('tokenAt', encrypt(acess_token));
+      CookieRt.set('tokenRt', encrypt(refresh_token));
+      const { email } = jwt.decode(acess_token) as { email: string };
       setEmail(email);
-      setAuthorized(true);
       return push('/main-page');
     } else {
       setUnauthotorized(error || 'Algum erro ocorreu');
@@ -122,7 +126,7 @@ export default function Login() {
               size='lg'
               onClick={handleClick}
               type='submit'
-              disabled={!emailCondition.valid || !passwordCondition.valid}
+              disabled={handleButtonDisable()}
             >
               Login
             </Button>
@@ -146,9 +150,12 @@ export default function Login() {
 }
 
 export const getServerSideProps: GetServerSideProps = async ({ req }) => {
-  const { tokenAt, tokenRt, userEmail } = req.cookies;
+  const { tokenAt: AtEncrypted, tokenRt: RtEncrypted } = req.cookies;
 
-  if (tokenRt && userEmail) {
+  const tokenAt = decrypt(AtEncrypted);
+  const tokenRt = decrypt(RtEncrypted);
+
+  if (tokenRt) {
     return {
       props: {},
       redirect: {

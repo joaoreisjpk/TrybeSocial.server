@@ -21,15 +21,14 @@ export class AuthController {
   }
 
   async refreshTokens(req: Request, res: Response) {
-    const { email } = req.params;
+    const { id } = req.params;
     const { token } = req.headers as { token: string };
-    const tokens = await authService.refreshTokens(email, token);
+    const tokens = await authService.refreshTokens(Number(id), token);
     return res.json(tokens);
   }
 
-  async logout(req: Request, res: Response) {
+  async logout(req: Request, _res: Response) {
     const { email } = req.params;
-    const tokens = await authService.logout(email);
-    return res.json(tokens);
+    await authService.logout(email);
   }
 }

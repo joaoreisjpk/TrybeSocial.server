@@ -2,7 +2,18 @@ import argon from 'argon2';
 import { AuthDto } from './dto';
 import { PrismaClient } from '@prisma/client';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime';
-import jwt from 'jsonwebtoken';
+import CryptoJS from 'crypto-js';
+import JWToken from '../helpers/jwt';
+
+const secret = process.env.JWT_SECRET || '';
+
+// Decrypt
+export const decrypt = (message: string) => {
+  const bytes = CryptoJS.AES.decrypt(message || '', secret);
+  return bytes.toString(CryptoJS.enc.Utf8);
+};
+
+const jwt = new JWToken();
 
 export class AuthService {
   prisma: PrismaClient;
@@ -41,7 +52,7 @@ export class AuthService {
     }
   }
 
-  async signin({ email, password }: AuthDto) {
+  async signin({ email, password: EncryptedPass }: AuthDto) {
     const user = await this.prisma.user.findUnique({
       where: {
         email,
@@ -50,13 +61,13 @@ export class AuthService {
 
     if (!user) return { error: 'Email ou Senha incorretos' };
 
-    const pwMatches = await argon.verify(user.hash, password);
+    const pwMatches = await argon.verify(user.hash, decrypt(EncryptedPass));
     if (!pwMatches) return { error: 'Email ou Senha incorretos' };
 
     const tokens = await this.getTokens(user.id, user.email);
     await this.updateRtHash(user.id, tokens.refresh_token);
 
-    return { ...tokens, email: user.email };
+    return tokens;
   }
 
   async getAll() {
@@ -73,23 +84,23 @@ export class AuthService {
     });
   }
 
-  async refreshTokens(email: string, rt: string) {
+  async refreshTokens(id: number, rt: string) {
     const user = await this.prisma.user.findUnique({
       where: {
-        email: email,
+        id,
       },
     });
 
-    if (!user || !user.tokenRt) return { error: 'Access Denied' };
+    if (!user || !user.tokenRt) return { error: 'Accesso Negado' };
 
     const rtMatches = await argon.verify(user.tokenRt, rt);
-    if (!rtMatches) return { error: 'Access Denied' };
+    if (!rtMatches) return { error: 'Accesso Negado' };
 
     const tokens = await this.getTokens(user.id, user.email);
 
     await this.updateRtHash(user.id, tokens.refresh_token);
 
-    return { ...tokens, email: user.email };
+    return tokens;
   }
 
   async updateRtHash(userId: number, rt: string) {
@@ -106,23 +117,17 @@ export class AuthService {
 
   async getTokens(userId: number, email: string) {
     const payload = {
-      sub: userId,
+      userId,
       email,
     };
 
-    const at = jwt.sign(payload, this.secret, {
-      algorithm: 'HS256',
-      expiresIn: '15min',
-    });
+    const acess_token = jwt.sign(payload, '15min');
 
-    const rt = jwt.sign(payload, this.secret, {
-      algorithm: 'HS256',
-      expiresIn: '7d',
-    });
+    const refresh_token = jwt.sign(`err${userId}notfound-${userId + 1}`, '3d');
 
     return {
-      acess_token: at,
-      refresh_token: rt,
+      acess_token,
+      refresh_token,
     };
   }
 }
