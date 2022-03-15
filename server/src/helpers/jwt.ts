@@ -1,10 +1,7 @@
 import jwt from 'jsonwebtoken';
 import 'dotenv/config';
 
-type payloadType = {
-  userId: number;
-  email: string;
-};
+type payloadType = string | { userId: number; email: string };
 
 export default class JWToken {
   private secret: string;
@@ -14,7 +11,9 @@ export default class JWToken {
   }
 
   sign(payload: payloadType, expiresIn: string) {
-    return jwt.sign(payload, this.secret, {
+    const payloadValue = typeof payload === 'string' ? { payload } : payload;
+
+    return jwt.sign(payloadValue, this.secret, {
       algorithm: 'HS256',
       expiresIn,
     });

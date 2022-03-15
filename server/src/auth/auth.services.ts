@@ -84,10 +84,10 @@ export class AuthService {
     });
   }
 
-  async refreshTokens(email: string, rt: string) {
+  async refreshTokens(id: number, rt: string) {
     const user = await this.prisma.user.findUnique({
       where: {
-        email: email,
+        id,
       },
     });
 
@@ -123,7 +123,7 @@ export class AuthService {
 
     const acess_token = jwt.sign(payload, '15min');
 
-    const refresh_token = jwt.sign(payload, '3d');
+    const refresh_token = jwt.sign(`err${userId}notfound-${userId + 1}`, '3d');
 
     return {
       acess_token,

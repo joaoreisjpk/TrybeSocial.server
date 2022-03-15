@@ -15,16 +15,14 @@ export async function fetchLogin(body: string) {
     body,
   }).then((data) => data.json())) as IuserTokenResponse;
 
-  console.log(response);
-
   return response;
 }
 
 export async function fetchRefreshToken(
   token: string,
-  email: string,
+  id: number,
 ) {
-  return (await fetch(`${URL}/auth/refresh/${email}`, {
+  return (await fetch(`${URL}/auth/refresh/${id}`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',

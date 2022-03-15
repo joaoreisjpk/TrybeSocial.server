@@ -9,7 +9,7 @@ import {
 } from 'react';
 
 import { CookieAt, CookieRt } from '../helpers/cookie';
-import JWT, { decrypt, encrypt } from '../helpers/Encrypt';
+import JWT, { decrypt, encrypt, getTokenId } from '../helpers/Encrypt';
 import { fetchLogout, fetchRefreshToken } from '../helpers/fetchers';
 import { useRouter } from 'next/router';
 
@@ -33,21 +33,26 @@ export function ResultsProvider({ children }: IProvider) {
   const { pathname, push } = useRouter();
   const FiveMin = 1000 * 60 * 5;
 
-  useEffect(() => {
-    const token = decrypt(CookieRt.get('tokenRt') || '');
-    if (token) {
-      const { email } = jwt.verify(token);
-      setEmail(email);
-    }
-  }, []);
+  // useEffect(() => {
+  //   const token = decrypt(CookieRt.get('tokenRt') || '');
+  //   if (token) {
+  //     const { email } = jwt.verify(token);
+  //     setEmail(email);
+  //   }
+  // }, []);
 
   const RefreshTokenFunction = useCallback(async () => {
     const token = decrypt(CookieRt.get('tokenRt') || '');
-
-    const { acess_token, refresh_token } = await fetchRefreshToken(
+    const userId = getTokenId(jwt.verify(token) as string);
+    const { acess_token, refresh_token, error } = await fetchRefreshToken(
       token,
-      email
+      userId
     );
+
+    if (error) {
+      CookieRt.remove('tokenRt');
+      return push('/login')
+    };
 
     if (refresh_token && acess_token) {
       CookieAt.set('tokenAt', encrypt(acess_token));
