@@ -1,9 +1,17 @@
 import argon from 'argon2';
-import { v4 as uuid } from 'uuid';
 import { AuthDto } from './dto';
 import { PrismaClient } from '@prisma/client';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime';
+import CryptoJS from 'crypto-js';
 import JWToken from '../helpers/jwt';
+
+const secret = process.env.JWT_SECRET || '';
+
+// Decrypt
+export const decrypt = (message: string) => {
+  const bytes = CryptoJS.AES.decrypt(message || '', secret);
+  return bytes.toString(CryptoJS.enc.Utf8);
+};
 
 const jwt = new JWToken();
 
@@ -44,7 +52,7 @@ export class AuthService {
     }
   }
 
-  async signin({ email, password }: AuthDto) {
+  async signin({ email, password: EncryptedPass }: AuthDto) {
     const user = await this.prisma.user.findUnique({
       where: {
         email,
@@ -53,7 +61,7 @@ export class AuthService {
 
     if (!user) return { error: 'Email ou Senha incorretos' };
 
-    const pwMatches = await argon.verify(user.hash, password);
+    const pwMatches = await argon.verify(user.hash, decrypt(EncryptedPass));
     if (!pwMatches) return { error: 'Email ou Senha incorretos' };
 
     const tokens = await this.getTokens(user.id, user.email);

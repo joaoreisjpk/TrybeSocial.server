@@ -5,8 +5,8 @@ import { MouseEvent, useState } from 'react';
 import Button from 'react-bootstrap/Button';
 import Container from 'react-bootstrap/Container';
 import Form from 'react-bootstrap/Form';
-import { CookieAt, CookieRt } from '../../helpers/cookie';
 
+import { CookieAt, CookieRt } from '../../helpers/cookie';
 import Header from '../../components/Header';
 import FormInput from './_formInput';
 import * as Validation from '../../helpers/validation';
@@ -71,7 +71,7 @@ export default function Login() {
 
     const body = JSON.stringify({
       email: user,
-      password,
+      password: encrypt(password),
     });
 
     const { acess_token, refresh_token, error } = await fetchLogin(body);
@@ -154,6 +154,8 @@ export const getServerSideProps: GetServerSideProps = async ({ req }) => {
 
   const tokenAt = decrypt(AtEncrypted);
   const tokenRt = decrypt(RtEncrypted);
+
+  console.log('reload login');
 
   if (tokenRt) {
     return {

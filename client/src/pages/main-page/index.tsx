@@ -28,7 +28,7 @@ export const getServerSideProps: GetServerSideProps = async ({ req }) => {
   const tokenAt = decrypt(AtCrypted);
   const tokenRt = decrypt(RtCrypted);
 
-  console.log(tokenAt);
+  console.log('realod main-page');
 
   if (!tokenRt) {
     return {
@@ -46,6 +46,8 @@ export const getServerSideProps: GetServerSideProps = async ({ req }) => {
     tokenRt,
     userEmail
   );
+
+  console.log(error);
 
   if (error) {
     return {
