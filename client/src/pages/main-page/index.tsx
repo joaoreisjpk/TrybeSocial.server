@@ -14,7 +14,6 @@ interface IServerSideProps {
     acess_token: string;
   };
 }
-
 export default function MainPage({
   email: propEmail,
   tokens,
