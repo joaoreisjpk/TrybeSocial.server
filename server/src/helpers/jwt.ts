@@ -1,10 +1,7 @@
 import jwt from 'jsonwebtoken';
 import 'dotenv/config';
 
-type payloadType = {
-  userId: number;
-  email: string;
-};
+type payloadType = string | { userId: number; email: string };
 
 export default class JWToken {
   private secret: string;
