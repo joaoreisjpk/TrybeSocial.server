@@ -1,10 +1,7 @@
 import jwt from 'jsonwebtoken';
 import CryptoJS from 'crypto-js';
 
-type payloadType = {
-  userId: number;
-  email: string;
-};
+type payloadType = string | { userId: number; email: string };
 
 const secret = process.env.JWT_SECRET || '';
 
@@ -40,3 +37,9 @@ export const decrypt = (message: string) => {
   const bytes = CryptoJS.AES.decrypt(message || '', secret);
   return bytes.toString(CryptoJS.enc.Utf8);
 };
+
+// GetId
+export const getTokenId = (token: string) => {
+  const id = token.match(/\d+/) as number[] | null;
+  return id ? id[0] : 0;
+}

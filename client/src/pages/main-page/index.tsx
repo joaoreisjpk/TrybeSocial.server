@@ -3,11 +3,15 @@ import Head from 'next/head';
 import React from 'react';
 import Header from '../../components/Header';
 import { fetchRefreshToken } from '../../helpers/fetchers';
-import JWT, { decrypt } from '../../helpers/Encrypt';
+import JWT, { encrypt, decrypt, getTokenId } from '../../helpers/Encrypt';
 import { useAuth } from '../../hooks/useAuth';
+import { CookieAt, CookieRt } from '../../helpers/cookie';
 
-export default function MainPage() {
-  const { email } = useAuth();
+export default function MainPage(props: { email: string }) {
+  const { email, setEmail } = useAuth();
+  if (email === '') {setEmail(props.email); console.log('email = ""');
+  };
+
   return (
     <div>
       <Head>
@@ -23,46 +27,48 @@ export default function MainPage() {
 }
 
 export const getServerSideProps: GetServerSideProps = async ({ req }) => {
-  const { tokenAt: AtCrypted, tokenRt: RtCrypted } = req.cookies;
+  const { tokenAt, tokenRt: RtCrypted } = req.cookies;
+  let AtCrypted = tokenAt;
+  
+  if (!RtCrypted) {
+    return {
+      props: {},
+      redirect: {
+        destination: '/login',
+        permanent: false,
+      },
+    };
+  }
 
-  const tokenAt = decrypt(AtCrypted);
   const tokenRt = decrypt(RtCrypted);
-
-  console.log('realod main-page');
-
-  if (!tokenRt) {
-    return {
-      props: {},
-      redirect: {
-        destination: '/login',
-        permanent: false,
-      },
-    };
-  }
-
   const jwt = new JWT();
-  const { email: userEmail } = jwt.decode(tokenAt);
-  const { acess_token, refresh_token, error } = await fetchRefreshToken(
-    tokenRt,
-    userEmail
-  );
 
-  console.log(error);
+  if (!AtCrypted) {
+    const userId = getTokenId(jwt.verify(tokenRt) as string);
+    const { acess_token, refresh_token, error } = await fetchRefreshToken(
+      tokenRt,
+      userId
+    );
 
-  if (error) {
-    return {
-      props: {},
-      redirect: {
-        destination: '/login',
-        permanent: false,
-      },
-    };
+    if (error) {
+      CookieRt.remove('tokenRt');
+      return {
+        props: {},
+        redirect: {
+          destination: '/login',
+          permanent: false,
+        },
+      };
+    }
+
+    CookieRt.set('tokenRt', encrypt(refresh_token as string));
+    CookieAt.set('tokenAt', encrypt(acess_token as string));
+    AtCrypted = acess_token as string;
   }
 
-  req.cookies.tokenRt = refresh_token as string;
-  req.cookies.tokenAt = acess_token as string;
+  const { email } = jwt.decode(decrypt(AtCrypted)) as { email: string };
 
   return {
-    props: {},
+    props: { email },
   };
 };
