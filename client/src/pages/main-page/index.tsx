@@ -1,15 +1,35 @@
 import { GetServerSideProps } from 'next';
 import Head from 'next/head';
-import React from 'react';
+import React, { useEffect } from 'react';
 import Header from '../../components/Header';
 import { fetchRefreshToken } from '../../helpers/fetchers';
 import JWT, { encrypt, decrypt, getTokenId } from '../../helpers/Encrypt';
 import { useAuth } from '../../hooks/useAuth';
 import { CookieAt, CookieRt } from '../../helpers/cookie';
 
-export default function MainPage(props: { email: string }) {
+interface IServerSideProps {
+  email: string;
+  tokens?: {
+    refresh_token: string;
+    acess_token: string;
+  };
+}
+
+export default function MainPage({
+  email: propEmail,
+  tokens,
+}: IServerSideProps) {
   const { email, setEmail } = useAuth();
-  if (email === '') { setEmail(props.email); console.log('email = ""'); };
+  if (email === '') {
+    setEmail(propEmail);
+  }
+
+  useEffect(() => {
+    if (tokens) {
+      CookieRt.set('tokenRt', encrypt(tokens.refresh_token));
+      CookieAt.set('tokenAt', encrypt(tokens.acess_token));
+    }
+  }, []);
 
   return (
     <div>
@@ -28,7 +48,7 @@ export default function MainPage(props: { email: string }) {
 export const getServerSideProps: GetServerSideProps = async ({ req }) => {
   const { tokenAt, tokenRt: RtCrypted } = req.cookies;
   let AtCrypted = tokenAt ? decrypt(tokenAt) : undefined;
-  
+
   if (!RtCrypted) {
     return {
       props: {},
@@ -49,7 +69,6 @@ export const getServerSideProps: GetServerSideProps = async ({ req }) => {
       userId
     );
     console.log({ userId, acess_token, refresh_token, error });
-    
 
     if (error) {
       CookieRt.remove('tokenRt');
@@ -61,16 +80,25 @@ export const getServerSideProps: GetServerSideProps = async ({ req }) => {
         },
       };
     }
-
-    CookieRt.set('tokenRt', encrypt(refresh_token as string));
-    CookieAt.set('tokenAt', encrypt(acess_token as string));
     AtCrypted = acess_token as string;
+    const { email } = jwt.decode(acess_token || '') as { email: string };
+
+    return {
+      props: {
+        email,
+        tokens: {
+          acess_token,
+          refresh_token,
+        },
+      },
+    };
   }
-  console.log({ OK: AtCrypted });
-  
+
   const { email } = jwt.decode(AtCrypted) as { email: string };
 
   return {
-    props: { email },
+    props: {
+      email,
+    },
   };
 };
