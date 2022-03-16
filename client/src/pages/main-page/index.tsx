@@ -1,33 +1,25 @@
 import { GetServerSideProps } from 'next';
 import Head from 'next/head';
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
+
 import Header from '../../components/Header';
 import { fetchRefreshToken } from '../../helpers/fetchers';
 import JWT, { encrypt, decrypt } from '../../helpers/Encrypt';
 import { useAuth } from '../../hooks/useAuth';
-import { CookieAt, CookieRt } from '../../helpers/cookie';
+import { fetchRefreshToken } from '../../helpers/fetchers';
+import JWT, { decrypt, encrypt, getTokenId, RTPayload } from '../../helpers/Encrypt';
+import { setCookieAt, setCookieRt, destroyCookie, parseCookies } from '../../helpers/cookie';
 
 interface IServerSideProps {
   email: string;
-  tokens?: {
-    refresh_token: string;
-    acess_token: string;
-  };
 }
 
-export default function MainPage({
-  email: propEmail,
-  tokens,
-}: IServerSideProps) {
+export default function MainPage({ email: propEmail }: IServerSideProps) {
   const { email, setEmail } = useAuth();
-  if (email === '') {
-    setEmail(propEmail);
-  }
 
   useEffect(() => {
-    if (tokens) {
-      CookieRt.set('tokenRt', encrypt(tokens.refresh_token));
-      CookieAt.set('tokenAt', encrypt(tokens.acess_token));
+    if (email === '') {
+      setEmail(propEmail);
     }
   }, []);
 
@@ -45,11 +37,13 @@ export default function MainPage({
   );
 }
 
-export const getServerSideProps: GetServerSideProps = async ({ req }) => {
-  const { tokenAt, tokenRt: RtCrypted } = req.cookies;
-  let AtCrypted = tokenAt ? decrypt(tokenAt) : undefined;
+export const getServerSideProps: GetServerSideProps = async (ctx) => {
+  const { 'tokenAt': encryptAt, 'tokenRt': encryptRt } = parseCookies(ctx);
+  let tokenAt = decrypt(encryptAt);
+  let tokenRt = decrypt(encryptRt);
 
-  if (!RtCrypted) {
+  if (!tokenRt) {
+    destroyCookie('tokenAt', ctx);
     return {
       props: {},
       redirect: {
@@ -59,7 +53,6 @@ export const getServerSideProps: GetServerSideProps = async ({ req }) => {
     };
   }
 
-  const tokenRt = decrypt(RtCrypted);
   const jwt = new JWT();
 
   if (!AtCrypted) {
@@ -68,10 +61,15 @@ export const getServerSideProps: GetServerSideProps = async ({ req }) => {
       tokenRt,
       userId
     );
-    console.log({ userId, acess_token, refresh_token, error });
 
-    if (error) {
-      CookieRt.remove('tokenRt');
+    if (acess_token && refresh_token) {
+      tokenAt = acess_token;
+
+      setCookieAt('tokenAt', encrypt(acess_token), ctx);
+
+      setCookieRt('tokenRt', encrypt(refresh_token), ctx);
+    } else {
+      destroyCookie('tokenRt', ctx);
       return {
         props: {},
         redirect: {
@@ -80,21 +78,9 @@ export const getServerSideProps: GetServerSideProps = async ({ req }) => {
         },
       };
     }
-    AtCrypted = acess_token as string;
-    const { email } = jwt.decode(acess_token || '') as { email: string };
-
-    return {
-      props: {
-        email,
-        tokens: {
-          acess_token,
-          refresh_token,
-        },
-      },
-    };
   }
 
-  const { email } = jwt.decode(AtCrypted) as { email: string };
+  const { email } = jwt.decode(tokenAt) as { email: string };
 
   return {
     props: {

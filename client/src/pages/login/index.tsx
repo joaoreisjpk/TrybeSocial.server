@@ -6,13 +6,13 @@ import Button from 'react-bootstrap/Button';
 import Container from 'react-bootstrap/Container';
 import Form from 'react-bootstrap/Form';
 
-import { CookieAt, CookieRt } from '../../helpers/cookie';
 import Header from '../../components/Header';
 import FormInput from './_formInput';
 import * as Validation from '../../helpers/validation';
 import { useAuth } from '../../hooks/useAuth';
-import { fetchLogin } from '../../helpers/fetchers';
-import JWT, { decrypt, encrypt } from '../../helpers/Encrypt';
+import { fetchLogin, fetchRefreshToken } from '../../helpers/fetchers';
+import JWT, { decrypt, encrypt, getTokenId, RTPayload } from '../../helpers/Encrypt';
+import { setCookieAt, setCookieRt, destroyCookie, parseCookies } from '../../helpers/cookie';
 
 const INITIAL_CONDITION = {
   valid: false,
@@ -75,10 +75,10 @@ export default function Login() {
     });
 
     const { acess_token, refresh_token, error } = await fetchLogin(body);
-    
+
     if (acess_token && refresh_token) {
-      CookieAt.set('tokenAt', encrypt(acess_token));
-      CookieRt.set('tokenRt', encrypt(refresh_token));
+      setCookieAt('tokenAt', acess_token);
+      setCookieRt('tokenRt', refresh_token);
       const { email } = jwt.decode(acess_token) as { email: string };
       setEmail(email);
       return push('/main-page');
@@ -149,19 +149,32 @@ export default function Login() {
   );
 }
 
-export const getServerSideProps: GetServerSideProps = async ({ req }) => {
-  const { tokenAt: AtEncrypted, tokenRt: RtEncrypted } = req.cookies;
-
-  const tokenAt = decrypt(AtEncrypted);
-  const tokenRt = decrypt(RtEncrypted);
+export const getServerSideProps: GetServerSideProps = async (ctx) => {
+  const { 'tokenRt': encryptRt } = parseCookies(ctx);
+  let tokenRt = decrypt(encryptRt);
 
   if (tokenRt) {
-    return {
-      props: {},
-      redirect: {
-        destination: '/main-page',
-      },
-    };
+    const userId = getTokenId(jwt.verify(tokenRt) as RTPayload);
+    const { acess_token, refresh_token, error } = await fetchRefreshToken(
+      tokenRt,
+      userId
+    );
+
+    if (acess_token && refresh_token) {
+      setCookieAt('tokenAt', encrypt(acess_token), ctx);
+
+      setCookieRt('tokenRt', encrypt(refresh_token), ctx);
+      return {
+        props: {},
+        redirect: {
+          destination: '/main-page',
+          permanent: false,
+        },
+      };
+    } else {
+      console.log(error);
+      destroyCookie('tokenRt', ctx);
+    }
   }
 
   return {
