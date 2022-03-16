@@ -3,6 +3,8 @@ import Head from 'next/head';
 import { useEffect } from 'react';
 
 import Header from '../../components/Header';
+import { fetchRefreshToken } from '../../helpers/fetchers';
+import JWT, { encrypt, decrypt } from '../../helpers/Encrypt';
 import { useAuth } from '../../hooks/useAuth';
 import { fetchRefreshToken } from '../../helpers/fetchers';
 import JWT, { decrypt, encrypt, getTokenId, RTPayload } from '../../helpers/Encrypt';
@@ -53,8 +55,8 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
 
   const jwt = new JWT();
 
-  if (!tokenAt) {
-    const userId = getTokenId(jwt.verify(tokenRt) as RTPayload);
+  if (!AtCrypted) {
+    const { userId } = jwt.decode(tokenRt);
     const { acess_token, refresh_token, error } = await fetchRefreshToken(
       tokenRt,
       userId

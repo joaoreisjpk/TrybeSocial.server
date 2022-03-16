@@ -123,7 +123,7 @@ export class AuthService {
 
     const acess_token = jwt.sign(payload, '15min');
 
-    const refresh_token = jwt.sign(`err${userId}notfound-${userId + 1}`, '3d');
+    const refresh_token = jwt.sign({ userId }, '3d');
 
     return {
       acess_token,
