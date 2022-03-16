@@ -3,8 +3,6 @@ import CryptoJS from 'crypto-js';
 
 export type payloadType = string | { userId: number; email: string };
 
-export type RTPayload = { payload: string }
-
 const secret = process.env.JWT_SECRET || '';
 
 export default class JWT {
@@ -41,7 +39,7 @@ export const decrypt = (message: string) => {
 };
 
 // GetId
-export const getTokenId = ({ payload }: RTPayload) => {
+export const getTokenId = ({ payload }: string) => {
   const id = payload.match(/\d+/) as number[] | null;
   return id ? id[0] : 0;
 }
