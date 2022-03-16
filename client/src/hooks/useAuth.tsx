@@ -9,7 +9,7 @@ import {
 } from 'react';
 
 import { CookieAt, CookieRt } from '../helpers/cookie';
-import JWT, { decrypt, encrypt, getTokenId } from '../helpers/Encrypt';
+import JWT, { decrypt, encrypt } from '../helpers/Encrypt';
 import { fetchLogout, fetchRefreshToken } from '../helpers/fetchers';
 import { useRouter } from 'next/router';
 
@@ -43,7 +43,7 @@ export function ResultsProvider({ children }: IProvider) {
 
   const RefreshTokenFunction = useCallback(async () => {
     const token = decrypt(CookieRt.get('tokenRt') || '');
-    const userId = getTokenId(jwt.verify(token) as string);
+    const { userId } = jwt.decode(token);
     const { acess_token, refresh_token, error } = await fetchRefreshToken(
       token,
       userId
