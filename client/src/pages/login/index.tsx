@@ -11,9 +11,8 @@ import FormInput from './_formInput';
 import * as Validation from '../../helpers/validation';
 import { useAuth } from '../../hooks/useAuth';
 import { fetchLogin, fetchRefreshToken } from '../../helpers/fetchers';
-import JWT, { decrypt, encrypt, getTokenId } from '../../helpers/Encrypt';
-import { destroyCookie, parseCookies, setCookie } from 'nookies';
-import { setCookieAt, setCookieRt } from '../../helpers/cookie';
+import JWT, { decrypt, encrypt, getTokenId, RTPayload } from '../../helpers/Encrypt';
+import { setCookieAt, setCookieRt, destroyCookie, parseCookies } from '../../helpers/cookie';
 
 const INITIAL_CONDITION = {
   valid: false,
@@ -151,24 +150,20 @@ export default function Login() {
 }
 
 export const getServerSideProps: GetServerSideProps = async (ctx) => {
-  const { tokenRt: encryptRt } = ctx.req.cookies;
+  const { 'tokenRt': encryptRt } = parseCookies(ctx);
   let tokenRt = decrypt(encryptRt);
 
   if (tokenRt) {
-    const userId = getTokenId(jwt.verify(tokenRt) as string);
+    const userId = getTokenId(jwt.verify(tokenRt) as RTPayload);
     const { acess_token, refresh_token, error } = await fetchRefreshToken(
       tokenRt,
       userId
     );
 
     if (acess_token && refresh_token) {
-      setCookie(ctx, 'tokenAt', encrypt(acess_token), {
-        maxAge: 60 * 30 /* 30min */,
-      });
+      setCookieAt('tokenAt', encrypt(acess_token), ctx);
 
-      setCookie(ctx, 'tokenRt', encrypt(refresh_token), {
-        maxAge: 60 * 60 * 24 * 7 /* 7d */,
-      });
+      setCookieRt('tokenRt', encrypt(refresh_token), ctx);
       return {
         props: {},
         redirect: {
@@ -178,7 +173,7 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
       };
     } else {
       console.log(error);
-      destroyCookie(ctx, 'tokenRt');
+      destroyCookie('tokenRt', ctx);
     }
   }
 

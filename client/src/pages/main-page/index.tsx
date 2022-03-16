@@ -1,19 +1,25 @@
 import { GetServerSideProps } from 'next';
 import Head from 'next/head';
+import { useEffect } from 'react';
+
 import Header from '../../components/Header';
-import { fetchRefreshToken } from '../../helpers/fetchers';
-import JWT, { decrypt, encrypt, getTokenId } from '../../helpers/Encrypt';
 import { useAuth } from '../../hooks/useAuth';
-import { destroyCookie, parseCookies, setCookie } from 'nookies';
+import { fetchRefreshToken } from '../../helpers/fetchers';
+import JWT, { decrypt, encrypt, getTokenId, RTPayload } from '../../helpers/Encrypt';
+import { setCookieAt, setCookieRt, destroyCookie, parseCookies } from '../../helpers/cookie';
 
 interface IServerSideProps {
   email: string;
 }
+
 export default function MainPage({ email: propEmail }: IServerSideProps) {
   const { email, setEmail } = useAuth();
-  if (email === '') {
-    setEmail(propEmail);
-  }
+
+  useEffect(() => {
+    if (email === '') {
+      setEmail(propEmail);
+    }
+  }, []);
 
   return (
     <div>
@@ -35,7 +41,7 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
   let tokenRt = decrypt(encryptRt);
 
   if (!tokenRt) {
-    destroyCookie(ctx, 'tokenAt');
+    destroyCookie('tokenAt', ctx);
     return {
       props: {},
       redirect: {
@@ -48,7 +54,7 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
   const jwt = new JWT();
 
   if (!tokenAt) {
-    const userId = getTokenId(jwt.verify(tokenRt) as string);
+    const userId = getTokenId(jwt.verify(tokenRt) as RTPayload);
     const { acess_token, refresh_token, error } = await fetchRefreshToken(
       tokenRt,
       userId
@@ -57,16 +63,11 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
     if (acess_token && refresh_token) {
       tokenAt = acess_token;
 
-      setCookie(ctx, 'tokenAt', encrypt(acess_token), {
-        maxAge: 60 * 30 /* 30min */,
-      });
+      setCookieAt('tokenAt', encrypt(acess_token), ctx);
 
-      setCookie(ctx, 'tokenRt', encrypt(refresh_token), {
-        maxAge: 60 * 60 * 24 * 7 /* 7d */,
-      });
+      setCookieRt('tokenRt', encrypt(refresh_token), ctx);
     } else {
-      console.log(error);
-      destroyCookie(ctx, 'tokenRt');
+      destroyCookie('tokenRt', ctx);
       return {
         props: {},
         redirect: {
@@ -78,7 +79,6 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
   }
 
   const { email } = jwt.decode(tokenAt) as { email: string };
-  console.log({ email, tokenAt, encryptAt });
 
   return {
     props: {

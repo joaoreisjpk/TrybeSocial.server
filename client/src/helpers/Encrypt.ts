@@ -1,7 +1,9 @@
 import jwt from 'jsonwebtoken';
 import CryptoJS from 'crypto-js';
 
-type payloadType = string | { userId: number; email: string };
+export type payloadType = string | { userId: number; email: string };
+
+export type RTPayload = { payload: string }
 
 const secret = process.env.JWT_SECRET || '';
 
@@ -20,7 +22,7 @@ export default class JWT {
   }
 
   verify(token: string) {
-    return jwt.verify(token, this.secret) as payloadType;
+    return jwt.verify(token, this.secret) as payloadType | RTPayload;
   }
 
   decode(token: string) {
@@ -39,7 +41,7 @@ export const decrypt = (message: string) => {
 };
 
 // GetId
-export const getTokenId = ({ payload }: string) => {
+export const getTokenId = ({ payload }: RTPayload) => {
   const id = payload.match(/\d+/) as number[] | null;
   return id ? id[0] : 0;
 }

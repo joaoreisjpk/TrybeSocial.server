@@ -7,16 +7,17 @@ import {
   SetStateAction,
   useCallback,
 } from 'react';
-
-import JWT, { decrypt, getTokenId } from '../helpers/Encrypt';
-import { fetchLogout, fetchRefreshToken } from '../helpers/fetchers';
 import { useRouter } from 'next/router';
+
+import JWT, { getTokenId } from '../helpers/Encrypt';
+import { fetchLogout, fetchRefreshToken } from '../helpers/fetchers';
 import {
   getCookie,
   destroyCookie,
   setCookieAt,
   setCookieRt,
 } from '../helpers/cookie';
+
 interface IContext {
   Logout: () => Promise<void>;
   email: string;
@@ -38,8 +39,9 @@ export function ResultsProvider({ children }: IProvider) {
   const FiveMin = 1000 * 60 * 5;
 
   const RefreshTokenFunction = useCallback(async () => {
-    const token = decrypt(getCookie('tokenRt'));
+    const token = getCookie('tokenRt');
     const userId = getTokenId(jwt.verify(token) as string);
+    console.log(userId);
     const { acess_token, refresh_token, error } = await fetchRefreshToken(
       token,
       userId
@@ -52,7 +54,7 @@ export function ResultsProvider({ children }: IProvider) {
       destroyCookie('tokenRt');
       return push('/login');
     }
-  }, [email]);
+  }, [push]);
 
   async function Logout() {
     destroyCookie('tokenAt');
@@ -63,7 +65,7 @@ export function ResultsProvider({ children }: IProvider) {
   }
 
   useEffect(() => {
-    const tokenRt = decrypt(getCookie('tokenRt'));
+    const tokenRt = getCookie('tokenRt');
     if (pathname !== '/login' && tokenRt && !intervalKey) {
       const intervalId = setInterval(RefreshTokenFunction, FiveMin);
       setIntervalKey(intervalId);
