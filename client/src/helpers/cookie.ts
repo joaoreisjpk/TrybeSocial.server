@@ -16,7 +16,7 @@ export const setCookieRt = (name: string, value: any) =>
 export const getCookie = (name: string) => {
   const { [name]: cookie } = parseCookies();
   console.log(`Cookie ${name}: `, cookie);
-  return decrypt(cookie);
+  return cookie;
 };
 
 export const destroyCookie = (name: string) => {

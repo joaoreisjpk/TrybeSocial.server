@@ -78,8 +78,8 @@ export default function Login() {
     const { acess_token, refresh_token, error } = await fetchLogin(body);
 
     if (acess_token && refresh_token) {
-      setCookieAt('tokenAt', encrypt(acess_token));
-      setCookieRt('tokenRt', encrypt(refresh_token));
+      setCookieAt('tokenAt', acess_token);
+      setCookieRt('tokenRt', refresh_token);
       const { email } = jwt.decode(acess_token) as { email: string };
       setEmail(email);
       return push('/main-page');
@@ -151,7 +151,7 @@ export default function Login() {
 }
 
 export const getServerSideProps: GetServerSideProps = async (ctx) => {
-  const { 'tokenRt': encryptRt } = parseCookies(ctx);
+  const { tokenRt: encryptRt } = ctx.req.cookies;
   let tokenRt = decrypt(encryptRt);
 
   if (tokenRt) {

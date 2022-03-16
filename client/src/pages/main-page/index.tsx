@@ -34,7 +34,8 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
   let tokenAt = decrypt(encryptAt);
   let tokenRt = decrypt(encryptRt);
 
-  if (!tokenAt) {
+  if (!tokenRt) {
+    destroyCookie(ctx, 'tokenAt');
     return {
       props: {},
       redirect: {
@@ -54,6 +55,8 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
     );
 
     if (acess_token && refresh_token) {
+      tokenAt = acess_token;
+
       setCookie(ctx, 'tokenAt', encrypt(acess_token), {
         maxAge: 60 * 30 /* 30min */,
       });
@@ -75,6 +78,7 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
   }
 
   const { email } = jwt.decode(tokenAt) as { email: string };
+  console.log({ email, tokenAt, encryptAt });
 
   return {
     props: {
