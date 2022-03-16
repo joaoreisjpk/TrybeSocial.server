@@ -20,7 +20,7 @@ export default class JWT {
   }
 
   verify(token: string) {
-    return jwt.verify(token, this.secret) as payloadType | RTPayload;
+    return jwt.verify(token, this.secret) as payloadType;
   }
 
   decode(token: string) {

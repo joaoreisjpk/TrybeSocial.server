@@ -9,8 +9,7 @@ import {
 } from 'react';
 import { useRouter } from 'next/router';
 
-import { CookieAt, CookieRt } from '../helpers/cookie';
-import JWT, { decrypt, encrypt } from '../helpers/Encrypt';
+import JWT from '../helpers/Encrypt';
 import { fetchLogout, fetchRefreshToken } from '../helpers/fetchers';
 import {
   getCookie,
@@ -40,9 +39,9 @@ export function ResultsProvider({ children }: IProvider) {
   const FiveMin = 1000 * 60 * 5;
 
   const RefreshTokenFunction = useCallback(async () => {
-    const token = decrypt(CookieRt.get('tokenRt') || '');
+    const token = getCookie('tokenRt');
     const { userId } = jwt.decode(token);
-    const { acess_token, refresh_token, error } = await fetchRefreshToken(
+    const { acess_token, refresh_token } = await fetchRefreshToken(
       token,
       userId
     );
@@ -52,6 +51,7 @@ export function ResultsProvider({ children }: IProvider) {
       setCookieRt('tokenRt', refresh_token);
     } else {
       destroyCookie('tokenRt');
+      destroyCookie('tokenAt');
       return push('/login');
     }
   }, [push]);

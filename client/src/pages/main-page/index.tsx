@@ -3,11 +3,9 @@ import Head from 'next/head';
 import { useEffect } from 'react';
 
 import Header from '../../components/Header';
-import { fetchRefreshToken } from '../../helpers/fetchers';
-import JWT, { encrypt, decrypt } from '../../helpers/Encrypt';
 import { useAuth } from '../../hooks/useAuth';
 import { fetchRefreshToken } from '../../helpers/fetchers';
-import JWT, { decrypt, encrypt, getTokenId, RTPayload } from '../../helpers/Encrypt';
+import JWT, { decrypt } from '../../helpers/Encrypt';
 import { setCookieAt, setCookieRt, destroyCookie, parseCookies } from '../../helpers/cookie';
 
 interface IServerSideProps {
@@ -55,9 +53,9 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
 
   const jwt = new JWT();
 
-  if (!AtCrypted) {
+  if (!tokenAt) {
     const { userId } = jwt.decode(tokenRt);
-    const { acess_token, refresh_token, error } = await fetchRefreshToken(
+    const { acess_token, refresh_token } = await fetchRefreshToken(
       tokenRt,
       userId
     );
@@ -65,9 +63,9 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
     if (acess_token && refresh_token) {
       tokenAt = acess_token;
 
-      setCookieAt('tokenAt', encrypt(acess_token), ctx);
+      setCookieAt('tokenAt', acess_token, ctx);
 
-      setCookieRt('tokenRt', encrypt(refresh_token), ctx);
+      setCookieRt('tokenRt', refresh_token, ctx);
     } else {
       destroyCookie('tokenRt', ctx);
       return {
@@ -80,7 +78,7 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
     }
   }
 
-  const { email } = jwt.decode(tokenAt) as { email: string };
+  const { email } = jwt.decode(tokenAt);
 
   return {
     props: {
