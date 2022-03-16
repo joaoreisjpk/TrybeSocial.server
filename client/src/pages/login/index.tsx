@@ -11,7 +11,7 @@ import FormInput from './_formInput';
 import * as Validation from '../../helpers/validation';
 import { useAuth } from '../../hooks/useAuth';
 import { fetchLogin, fetchRefreshToken } from '../../helpers/fetchers';
-import JWT, { decrypt, encrypt, getTokenId, RTPayload } from '../../helpers/Encrypt';
+import JWT, { decrypt, encrypt } from '../../helpers/Encrypt';
 import { setCookieAt, setCookieRt, destroyCookie, parseCookies } from '../../helpers/cookie';
 
 const INITIAL_CONDITION = {
@@ -79,6 +79,7 @@ export default function Login() {
     if (acess_token && refresh_token) {
       setCookieAt('tokenAt', acess_token);
       setCookieRt('tokenRt', refresh_token);
+      console.log(jwt.decode(acess_token), jwt.decode(refresh_token));
       const { email } = jwt.decode(acess_token) as { email: string };
       setEmail(email);
       return push('/main-page');
@@ -154,7 +155,7 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
   let tokenRt = decrypt(encryptRt);
 
   if (tokenRt) {
-    const userId = getTokenId(jwt.verify(tokenRt) as RTPayload);
+    const { userId } = jwt.verify(tokenRt);
     const { acess_token, refresh_token, error } = await fetchRefreshToken(
       tokenRt,
       userId
@@ -172,7 +173,6 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
         },
       };
     } else {
-      console.log(error);
       destroyCookie('tokenRt', ctx);
     }
   }
