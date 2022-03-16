@@ -79,7 +79,6 @@ export default function Login() {
     if (acess_token && refresh_token) {
       setCookieAt('tokenAt', acess_token);
       setCookieRt('tokenRt', refresh_token);
-      console.log(jwt.decode(acess_token), jwt.decode(refresh_token));
       const { email } = jwt.decode(acess_token) as { email: string };
       setEmail(email);
       return push('/main-page');
@@ -156,15 +155,15 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
 
   if (tokenRt) {
     const { userId } = jwt.verify(tokenRt);
-    const { acess_token, refresh_token, error } = await fetchRefreshToken(
+    const { acess_token, refresh_token } = await fetchRefreshToken(
       tokenRt,
       userId
     );
 
     if (acess_token && refresh_token) {
-      setCookieAt('tokenAt', encrypt(acess_token), ctx);
+      setCookieAt('tokenAt', acess_token, ctx);
 
-      setCookieRt('tokenRt', encrypt(refresh_token), ctx);
+      setCookieRt('tokenRt', refresh_token, ctx);
       return {
         props: {},
         redirect: {
