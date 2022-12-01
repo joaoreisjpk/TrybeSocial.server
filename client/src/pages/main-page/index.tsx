@@ -30,7 +30,7 @@ export default function MainPage({ email: propEmail }: IServerSideProps) {
       </Head>
       <Header />
       <h1>Main Page</h1>
-      <h2>Você está logado com o email: {email}</h2>
+      <h2>Você está logado com o email {email}</h2>
     </div>
   );
 }
