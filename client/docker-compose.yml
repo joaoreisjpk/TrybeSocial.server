@@ -1,0 +1,10 @@
+version: "3.7"
+
+services:
+  client:
+    build: .
+    container_name: trybe_social_client
+    ports:
+      - 3000:3000
+    volumes:
+      - .:/usr/client

@@ -1,19 +1,25 @@
-const URL = process.env.URL //|| 'http://localhost:3333';
+const URL = process.env.URL || 'http://localhost:3333';
 
 interface IuserTokenResponse {
   acess_token?: string;
   refresh_token?: string;
   error?: string;
 }
-
+console.log(URL)
 export async function fetchLogin(body: string) {
-  const response = (await fetch(`${URL}/auth/signin`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body,
-  }).then((data) => data.json())) as IuserTokenResponse;
+  let response
+  try {
+    response = (await fetch(`${URL}/auth/signin`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body,
+    }).then((data) => data.json())) as IuserTokenResponse;
+  } catch (err) {
+    console.log(err)
+    return {}
+  }
 
   return response;
 }
