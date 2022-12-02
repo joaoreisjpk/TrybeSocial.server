@@ -1,14 +1,12 @@
 module.exports = {
   parser: '@typescript-eslint/parser',
   parserOptions: {
-    project: 'server/tsconfig.json',
     sourceType: 'module',
-    ecmaVersion: 2020,
+    ecmaVersion: 'es6',
   },
   plugins: ['@typescript-eslint/eslint-plugin'],
   extends: [
     'plugin:@typescript-eslint/recommended',
-    'plugin:prettier/recommended',
     'airbnb-base',
     'eslint:recommended',
   ],
@@ -19,9 +17,7 @@ module.exports = {
   },
   ignorePatterns: ['.eslintrc.js'],
   rules: {
-    '@typescript-eslint/interface-name-prefix': 'off',
-    '@typescript-eslint/explicit-function-return-type': 'off',
-    '@typescript-eslint/explicit-module-boundary-types': 'off',
-    '@typescript-eslint/no-explicit-any': 'off',
+    'import/extensions': 'off',
+    'import/no-unresolved': 'off'
   },
 };

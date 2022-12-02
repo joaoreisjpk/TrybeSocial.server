@@ -1,10 +1,11 @@
+/* eslint-disable class-methods-use-this */
 import { Request, Response } from 'express';
 import { AuthService } from './auth.services';
-import { AuthDto } from './dto';
+import AuthDto from './dto';
 
 const authService = new AuthService();
 
-export class AuthController {
+export default class AuthController {
   async signup(req: Request, res: Response) {
     const user = await authService.signup(req.body as AuthDto);
     return res.json(user);
@@ -27,7 +28,7 @@ export class AuthController {
     return res.json(tokens);
   }
 
-  async logout(req: Request, _res: Response) {
+  async logout(req: Request) {
     const { email } = req.params;
     await authService.logout(email);
   }

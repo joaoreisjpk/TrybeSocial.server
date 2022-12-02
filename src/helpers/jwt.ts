@@ -23,6 +23,7 @@ export default class JWToken {
     return jwt.verify(token, this.secret);
   }
 
+  // eslint-disable-next-line class-methods-use-this
   decode(token: string) {
     return jwt.decode(token);
   }
