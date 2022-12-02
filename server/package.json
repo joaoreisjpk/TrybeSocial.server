@@ -5,6 +5,7 @@
   "author": "João Pedro Reis de Mello",
   "private": true,
   "license": "UNLICENSED",
+  "type": "module",
   "scripts": {
     "c": "git add && git commit -m",
     "dev": "ts-node-dev --transpile-only --ignore-watch node_modules --respawn src/server.ts",

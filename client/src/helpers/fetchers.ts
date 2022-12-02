@@ -28,13 +28,20 @@ export async function fetchRefreshToken(
   token: string,
   id: number,
 ) {
-  return (await fetch(`${URL}/auth/refresh/${id}`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      token,
-    },
-  }).then((data) => data.json())) as IuserTokenResponse;
+  try {
+    const TokenResponse = await fetch(`${URL}/auth/refresh/${id}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        token,
+      },
+    }).then((data) => data.json()) as IuserTokenResponse;
+    console.log('TokenResponse', TokenResponse)
+    return TokenResponse
+  } catch (err) {
+    console.log(err)
+    return {}
+  }
 }
 
 export async function fetchLogout(email: string) {
