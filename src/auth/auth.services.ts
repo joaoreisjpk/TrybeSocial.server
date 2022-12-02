@@ -39,7 +39,7 @@ export class AuthService {
       });
 
       const tokens = await this.getTokens(newUser.id, newUser.email);
-      await this.updateRtHash(newUser.id, tokens.refresh_token);
+      await this.updateRtHash(newUser.id, tokens.refreshToken);
 
       return tokens;
     } catch (err) {
@@ -65,7 +65,7 @@ export class AuthService {
     if (!pwMatches) return { error: 'Email ou Senha incorretos' };
 
     const tokens = await this.getTokens(user.id, user.email);
-    await this.updateRtHash(user.id, tokens.refresh_token);
+    await this.updateRtHash(user.id, tokens.refreshToken);
 
     return tokens;
   }
@@ -98,7 +98,7 @@ export class AuthService {
 
     const tokens = await this.getTokens(user.id, user.email);
 
-    await this.updateRtHash(user.id, tokens.refresh_token);
+    await this.updateRtHash(user.id, tokens.refreshToken);
 
     return tokens;
   }
@@ -121,13 +121,13 @@ export class AuthService {
       email,
     };
 
-    const acess_token = jwt.sign(payload, '15min');
+    const acessToken = jwt.sign(payload, '15min');
 
-    const refresh_token = jwt.sign({ userId }, '3d');
+    const refreshToken = jwt.sign({ userId }, '3d');
 
     return {
-      acess_token,
-      refresh_token,
+      acessToken,
+      refreshToken,
     };
   }
 }
