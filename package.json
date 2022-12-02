@@ -9,7 +9,7 @@
     "c": "git add && git commit -m",
     "dev": "npx prisma migrate dev && ts-node-dev --transpile-only --ignore-watch node_modules --respawn src/server.ts",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
-    "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix"
+    "lint": "eslint --fix"
   },
   "dependencies": {
     "@prisma/client": "^3.10.0",
@@ -32,7 +32,9 @@
     "@typescript-eslint/eslint-plugin": "^5.0.0",
     "@typescript-eslint/parser": "^5.0.0",
     "eslint": "^8.0.1",
+    "eslint-config-airbnb-base": "^15.0.0",
     "eslint-config-prettier": "^8.3.0",
+    "eslint-plugin-import": "^2.26.0",
     "eslint-plugin-prettier": "^4.0.0",
     "prettier": "^2.3.2",
     "prisma": "^3.10.0",
