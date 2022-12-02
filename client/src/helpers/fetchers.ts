@@ -1,13 +1,13 @@
-const URL = process.env.URL || 'http://localhost:3333';
+const URL = process.env.URL || 'http://44.200.247.39:3333';
 
 interface IuserTokenResponse {
   acess_token?: string;
   refresh_token?: string;
   error?: string;
 }
-console.log(URL)
+console.log(URL);
 export async function fetchLogin(body: string) {
-  let response
+  let response;
   try {
     response = (await fetch(`${URL}/auth/signin`, {
       method: 'POST',
@@ -17,17 +17,14 @@ export async function fetchLogin(body: string) {
       body,
     }).then((data) => data.json())) as IuserTokenResponse;
   } catch (err) {
-    console.log(err)
-    return {}
+    console.log(err);
+    return {};
   }
 
   return response;
 }
 
-export async function fetchRefreshToken(
-  token: string,
-  id: number,
-) {
+export async function fetchRefreshToken(token: string, id: number) {
   return (await fetch(`${URL}/auth/refresh/${id}`, {
     method: 'POST',
     headers: {

@@ -7,7 +7,7 @@
   "license": "UNLICENSED",
   "scripts": {
     "c": "git add && git commit -m",
-    "dev": "ts-node-dev --transpile-only --ignore-watch node_modules --respawn src/server.ts",
+    "dev": "npx prisma migrate dev && ts-node-dev --transpile-only --ignore-watch node_modules --respawn src/server.ts",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix"
   },
