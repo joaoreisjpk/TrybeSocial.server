@@ -23,7 +23,7 @@ export default function Login() {
   ) => {
     e.preventDefault();
 
-    const URL = process.env.URL || 'http://localhost:3333';
+    const URL = process.env.URL || 'http://44.200.247.39:3333';
 
     const body = JSON.stringify({
       email: user,
