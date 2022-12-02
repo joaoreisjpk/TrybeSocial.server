@@ -1,8 +1,9 @@
 import argon from 'argon2';
-import { AuthDto } from './dto';
 import { PrismaClient } from '@prisma/client';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime';
 import CryptoJS from 'crypto-js';
+
+import AuthDto from './dto';
 import JWToken from '../helpers/jwt';
 
 const secret = process.env.JWT_SECRET || '';
@@ -17,6 +18,7 @@ const jwt = new JWToken();
 
 export class AuthService {
   prisma: PrismaClient;
+
   secret: string;
 
   constructor() {
@@ -25,7 +27,9 @@ export class AuthService {
   }
 
   async signup(dto: AuthDto) {
-    const { email, password, firstName, lastName } = dto;
+    const {
+      email, password, firstName, lastName,
+    } = dto;
     const hash = await argon.hash(password);
 
     try {
@@ -78,7 +82,7 @@ export class AuthService {
   async logout(email: string) {
     await this.prisma.user.update({
       where: {
-        email: email,
+        email,
       },
       data: { tokenRt: null },
     });
@@ -115,6 +119,7 @@ export class AuthService {
     });
   }
 
+  // eslint-disable-next-line class-methods-use-this
   async getTokens(userId: number, email: string) {
     const payload = {
       userId,
