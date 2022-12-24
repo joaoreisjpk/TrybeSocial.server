@@ -7,7 +7,7 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
+  url      = "postgresql://trybesocialdb:Tryber@123@localhost:5432/trybesocialdb"
 }
 
 model User {
