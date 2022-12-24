@@ -1,35 +1,38 @@
-/* eslint-disable class-methods-use-this */
 import { Request, Response } from 'express';
 import { AuthService } from './auth.services';
 import AuthDto from './dto';
 
-const authService = new AuthService();
-
 export default class AuthController {
+  private readonly authService: AuthService;
+
+  constructor(authService: AuthService) {
+    this.authService = authService;
+  }
+
   async signup(req: Request, res: Response) {
-    const user = await authService.signup(req.body as AuthDto);
-    return res.json(user);
+    const tokens = await this.authService.signup(req.body as AuthDto);
+    return res.json(tokens);
   }
 
   async signin(req: Request, res: Response) {
-    const user = await authService.signin(req.body as AuthDto);
-    return res.json(user);
+    const tokens = await this.authService.signin(req.body as AuthDto);
+    return res.json(tokens);
   }
 
   async users(req: Request, res: Response) {
-    const users = await authService.getAll();
+    const users = await this.authService.getAll();
     return res.json(users);
   }
 
   async refreshTokens(req: Request, res: Response) {
     const { id } = req.params;
     const { token } = req.headers as { token: string };
-    const tokens = await authService.refreshTokens(Number(id), token);
+    const tokens = await this.authService.refreshTokens(Number(id), token);
     return res.json(tokens);
   }
 
   async logout(req: Request) {
     const { email } = req.params;
-    await authService.logout(email);
+    return this.authService.logout(email);
   }
 }

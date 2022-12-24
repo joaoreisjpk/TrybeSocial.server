@@ -78,7 +78,6 @@ export class AuthService {
     return this.prisma.user.findMany();
   }
 
-  // TODO
   async logout(email: string) {
     await this.prisma.user.update({
       where: {
