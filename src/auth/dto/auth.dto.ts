@@ -6,4 +6,6 @@ export default class AuthDto {
   firstName: string;
 
   lastName: string;
+
+  trybe: string;
 }
