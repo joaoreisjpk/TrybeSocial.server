@@ -28,7 +28,7 @@ export class AuthService {
 
   async signup(dto: AuthDto) {
     const {
-      email, password, firstName, lastName,
+      email, password, firstName, lastName, trybe,
     } = dto;
     const hash = await argon.hash(password);
 
@@ -39,6 +39,7 @@ export class AuthService {
           hash,
           firstName,
           lastName,
+          trybe,
         },
       });
 

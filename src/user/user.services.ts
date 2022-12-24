@@ -18,7 +18,7 @@ export default class UserService {
         email: true,
         firstName: true,
         lastName: true,
-        turma: true,
+        trybe: true,
       },
     });
   }

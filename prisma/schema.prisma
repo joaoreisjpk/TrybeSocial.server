@@ -19,6 +19,7 @@ model User {
   hash  String
   tokenRt String?
 
+  trybe String?
   firstName String?
   lastName  String?
 
