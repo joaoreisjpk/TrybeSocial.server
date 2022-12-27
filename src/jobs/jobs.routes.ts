@@ -1,13 +1,13 @@
 import { Router } from 'express';
-import AuthController from './jobs.controller';
+import JobsController from './jobs.controller';
 import 'dotenv/config';
-import UserService from './jobs.services';
+import JobsService from './jobs.services';
 
 const router = Router();
 
 const newController = () => {
-  const userService = new UserService();
-  return new AuthController(userService);
+  const jobsService = new JobsService();
+  return new JobsController(jobsService);
 };
 
 router.get('/', (req, res) => newController().listJobs(req, res));
