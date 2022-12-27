@@ -43,8 +43,8 @@ export class AuthService {
         },
       });
 
-      const tokens = await this.getTokens(newUser.id, newUser.email);
-      await this.updateRtHash(newUser.id, tokens.refreshToken);
+      const tokens = await this.getTokens(newUser.user_id, newUser.email);
+      await this.updateRtHash(newUser.user_id, tokens.refreshToken);
 
       return tokens;
     } catch (err) {
@@ -69,8 +69,8 @@ export class AuthService {
     const pwMatches = await argon.verify(user.hash, decrypt(EncryptedPass));
     if (!pwMatches) return { error: 'Email ou Senha incorretos' };
 
-    const tokens = await this.getTokens(user.id, user.email);
-    await this.updateRtHash(user.id, tokens.refreshToken);
+    const tokens = await this.getTokens(user.user_id, user.email);
+    await this.updateRtHash(user.user_id, tokens.refreshToken);
 
     return tokens;
   }
@@ -91,7 +91,7 @@ export class AuthService {
   async refreshTokens(id: number, rt: string) {
     const user = await this.prisma.user.findUnique({
       where: {
-        id,
+        user_id: id,
       },
     });
 
@@ -100,9 +100,9 @@ export class AuthService {
     const rtMatches = await argon.verify(user.tokenRt, rt);
     if (!rtMatches) return { error: 'Accesso Negado' };
 
-    const tokens = await this.getTokens(user.id, user.email);
+    const tokens = await this.getTokens(user.user_id, user.email);
 
-    await this.updateRtHash(user.id, tokens.refreshToken);
+    await this.updateRtHash(user.user_id, tokens.refreshToken);
 
     return tokens;
   }
@@ -111,7 +111,7 @@ export class AuthService {
     const hash = await argon.hash(rt);
     await this.prisma.user.update({
       where: {
-        id: userId,
+        user_id: userId,
       },
       data: {
         tokenRt: hash,

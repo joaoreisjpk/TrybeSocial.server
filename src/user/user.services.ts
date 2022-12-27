@@ -10,7 +10,7 @@ export default class UserService {
   }
 
   async getUser(email: string) {
-    return this.prisma.user.findUnique({
+    return this.prisma.user.create({
       where: {
         email,
       },
