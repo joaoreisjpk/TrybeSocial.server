@@ -37,4 +37,15 @@ model Job {
   @@map("jobs")
 }
 
+model Lab {
+  id    Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  name  String
+  external_link String
+
+  @@map("labs")
+}
+
 

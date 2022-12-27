@@ -9,11 +9,11 @@ export default class UserService {
     this.prisma = new PrismaClient();
   }
 
-  async listJobs() {
-    return this.prisma.job.findMany();
+  async listLabs() {
+    return this.prisma.lab.findMany();
   }
 
-  async createJob(data: { name: string, link: string}) {
-    return this.prisma.job.create({ data });
+  async createLab(data: { name: string, link: string}) {
+    return this.prisma.lab.create({ data });
   }
 }
