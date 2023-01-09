@@ -8,16 +8,16 @@
 -- AlterTable
 ALTER TABLE "users" DROP CONSTRAINT "users_pkey",
 DROP COLUMN "id",
-ADD COLUMN     "user_id" SERIAL NOT NULL,
-ADD CONSTRAINT "users_pkey" PRIMARY KEY ("user_id");
+ADD COLUMN     "id" SERIAL NOT NULL,
+ADD CONSTRAINT "users_pkey" PRIMARY KEY ("id");
 
 -- CreateTable
 CREATE TABLE "jobs" (
-    "job_id" SERIAL NOT NULL,
+    "id" SERIAL NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
     "name" TEXT NOT NULL,
-    "external_link" TEXT NOT NULL,
+    "link" TEXT NOT NULL,
 
-    CONSTRAINT "jobs_pkey" PRIMARY KEY ("job_id")
+    CONSTRAINT "jobs_pkey" PRIMARY KEY ("id")
 );

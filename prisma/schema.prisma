@@ -7,11 +7,11 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url      = "postgresql://trybesocialdb:Tryber@123@localhost:5432/trybesocialdb"
+  url      = env("DB_URL")
 }
 
 model User {
-  user_id   Int      @id @default(autoincrement())
+  id   Int      @id @default(autoincrement())
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -27,12 +27,12 @@ model User {
 }
 
 model Job {
-  job_id    Int      @id @default(autoincrement())
+  id    Int      @id @default(autoincrement())
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   name  String
-  external_link String
+  link String
 
   @@map("jobs")
 }
@@ -43,7 +43,7 @@ model Lab {
   updatedAt DateTime @updatedAt
 
   name  String
-  external_link String
+  link String
 
   @@map("labs")
 }
