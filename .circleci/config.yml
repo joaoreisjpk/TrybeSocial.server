@@ -16,4 +16,4 @@ workflows:
             branches:
               only:
                 - main
-          label: version-<<pipeline.number>>
+          label: trybesocial
