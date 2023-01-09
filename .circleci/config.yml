@@ -11,6 +11,7 @@ workflows:
       #    pkg-manager: npm
       - eb/deploy:
           context: aws-creds
+          application-name: trybesocial
           environment-name: trybesocial-dev
           filters:
             branches:
