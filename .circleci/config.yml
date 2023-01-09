@@ -1,0 +1,19 @@
+version: 2.1
+orbs:
+  aws-elastic-beanstalk: circleci/aws-elastic-beanstalk@2.0.1
+  node: circleci/node@4.7
+workflows:
+  sample: # This is the name of the workflow, feel free to change it to better match your workflow.
+    # Inside the workflow, you define the jobs you want to run.
+    jobs:
+      #- node/test:
+      #    version: '16.10'
+      #    pkg-manager: npm
+      - eb/deploy:
+          context: aws-creds
+          environment-name: trybesocial-dev
+          filters:
+            branches:
+              only:
+                - main
+          label: version-<<pipeline.number>>
