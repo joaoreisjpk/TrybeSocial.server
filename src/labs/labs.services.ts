@@ -13,7 +13,7 @@ export default class UserService {
     return this.prisma.lab.findMany();
   }
 
-  async createLab(data: { name: string, external_link: string}) {
+  async createLab(data: { name: string, link: string}) {
     return this.prisma.lab.create({ data });
   }
 }

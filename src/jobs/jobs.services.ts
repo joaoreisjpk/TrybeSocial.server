@@ -13,7 +13,7 @@ export default class UserService {
     return this.prisma.job.findMany();
   }
 
-  async createJob(data: { name: string, external_link: string}) {
+  async createJob(data: { name: string, link: string}) {
     return this.prisma.job.create({ data });
   }
 }
