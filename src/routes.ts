@@ -10,6 +10,6 @@ router.use('/auth', AuthRouter);
 router.use('/user', UserRouter);
 router.use('/jobs', JobsRouter);
 router.use('/labs', LabsRouter);
-router.use('/', (req, res) => res.send('booora v4'));
+router.use('/', (req, res) => res.send('booora v5'));
 
 export default router;
