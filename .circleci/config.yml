@@ -11,10 +11,10 @@ workflows:
       #    pkg-manager: npm
       - eb/deploy:
           context: aws-creds
-          application-name: deploytest
-          environment-name: deploytest
+          application-name: trybesocial
+          environment-name: trybesocial
           filters:
             branches:
               only:
                 - main
-          label: deploytest
+          label: trybesocial
