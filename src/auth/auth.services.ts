@@ -6,11 +6,10 @@ import CryptoJS from 'crypto-js';
 import AuthDto from './dto';
 import JWToken from '../helpers/jwt';
 
-const secret = process.env.JWT_SECRET || '';
-
 // Decrypt
 export const decrypt = (message: string) => {
-  const bytes = CryptoJS.AES.decrypt(message || '', secret);
+  const secret = process.env.JWT_SECRET.replace(/(\r\n|\n|\r)/gm, '');
+  const bytes = CryptoJS.AES.decrypt(message, secret);
   return bytes.toString(CryptoJS.enc.Utf8);
 };
 
