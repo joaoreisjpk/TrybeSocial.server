@@ -41,10 +41,18 @@ export class AuthService {
         },
       });
 
-      const tokens = await this.getTokens(newUser.id, newUser.email);
-      await this.updateRtHash(newUser.id, tokens.refreshToken);
+      const accessToken = await this.getTokens(newUser.email);
+      await this.updateRtHash(newUser.email, accessToken);
 
-      return tokens;
+      return {
+        user: {
+          email: newUser.email,
+          firstName: newUser.firstName,
+          lastName: newUser.lastName,
+          trybe: newUser.trybe,
+          accessToken,
+        },
+      };
     } catch (err) {
       if (err instanceof PrismaClientKnownRequestError) {
         if (err.code === 'P2002') {
@@ -55,7 +63,7 @@ export class AuthService {
     }
   }
 
-  async signin({ email, password: EncryptedPass }: AuthDto) {
+  async signin({ email, password: encryptedPassword }: AuthDto) {
     const user = await this.prisma.user.findUnique({
       where: {
         email,
@@ -64,13 +72,21 @@ export class AuthService {
 
     if (!user) return { error: 'Email ou Senha incorretos' };
 
-    const pwMatches = await argon.verify(user.hash, decrypt(EncryptedPass));
-    if (!pwMatches) return { error: 'Email ou Senha incorretos' };
+    const isArgonVerified = await argon.verify(user.hash, decrypt(encryptedPassword));
+    if (!isArgonVerified) return { error: 'Email ou Senha incorretos' };
 
-    const tokens = await this.getTokens(user.id, user.email);
-    await this.updateRtHash(user.id, tokens.refreshToken);
+    const accessToken = await this.getTokens(user.email);
+    await this.updateRtHash(user.email, accessToken);
 
-    return tokens;
+    return {
+      user: {
+        email: user.email,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        trybe: user.trybe,
+        accessToken,
+      },
+    };
   }
 
   async getAll() {
@@ -86,30 +102,54 @@ export class AuthService {
     });
   }
 
-  async refreshTokens(id: number, rt: string) {
+  async updateUserAuth(email, currentAuthToken) {
     const user = await this.prisma.user.findUnique({
       where: {
-        id,
+        email,
+      },
+    });
+    if (!user?.tokenRt) throw new Error('access denied');
+    
+    const isArgonVerified = await argon.verify(user.tokenRt, currentAuthToken);
+
+    if (!isArgonVerified) throw new Error('access denied');
+
+    const accessToken = await this.getTokens(user.email);
+
+    await this.updateRtHash(user.email, accessToken);
+
+    return {
+      user: {
+        email: user.email,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        trybe: user.trybe,
+        accessToken,
+      },
+    };
+  }
+
+  async validateToken(rt: string) {
+    const jwtt = jwt.decode(rt) as { email: string }
+    const user = await this.prisma.user.findUnique({
+      where: {
+        email: jwtt?.email,
       },
     });
 
     if (!user || !user.tokenRt) return { error: 'Accesso Negado' };
 
-    const rtMatches = await argon.verify(user.tokenRt, rt);
-    if (!rtMatches) return { error: 'Accesso Negado' };
+    const isArgonVerified = await argon.verify(user.tokenRt, rt);
+    if (!isArgonVerified) return { error: 'Accesso Negado' };
 
-    const tokens = await this.getTokens(user.id, user.email);
-
-    await this.updateRtHash(user.id, tokens.refreshToken);
-
-    return tokens;
+    return isArgonVerified ? {} : { error: 'Accesso Negado' };
   }
 
-  async updateRtHash(userId: number, rt: string) {
+  async updateRtHash(email: string, rt: string) {
     const hash = await argon.hash(rt);
     await this.prisma.user.update({
       where: {
-        id: userId,
+        email,
       },
       data: {
         tokenRt: hash,
@@ -118,19 +158,10 @@ export class AuthService {
   }
 
   // eslint-disable-next-line class-methods-use-this
-  async getTokens(userId: number, email: string) {
-    const payload = {
-      userId,
-      email,
-    };
+  async getTokens(email: string) {
+    const accessToken = jwt.sign(email, '7d');
+    // const refreshToken = jwt.sign(email, '3d');
 
-    const acessToken = jwt.sign(payload, '15min');
-
-    const refreshToken = jwt.sign({ userId }, '3d');
-
-    return {
-      acessToken,
-      refreshToken,
-    };
+    return accessToken
   }
 }

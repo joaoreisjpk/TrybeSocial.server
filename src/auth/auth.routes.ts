@@ -14,7 +14,7 @@ const newController = () => {
 router.get('/users', (req, res) => newController().users(req, res));
 router.post('/signup', (req, res) => newController().signup(req, res));
 router.post('/signin', (req, res) => newController().signin(req, res));
-router.post('/refresh/:id', (req, res) => newController().refreshTokens(req, res));
+router.post('/refresh/:email', (req, res) => newController().updateUserAuth(req, res));
 router.post('/logout/:email', (req) => newController().logout(req));
 
 export default router;
