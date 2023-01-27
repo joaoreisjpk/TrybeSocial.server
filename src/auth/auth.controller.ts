@@ -10,18 +10,30 @@ export default class AuthController {
   }
 
   async signup(req: Request, res: Response) {
-    const tokens = await this.authService.signup(req.body as AuthDto);
-    return res.json(tokens);
+    try {
+      const tokens = await this.authService.signup(req.body as AuthDto);
+      return res.json(tokens);
+    } catch(err) {
+      res.status(500).json(err)
+    }
   }
 
   async signin(req: Request, res: Response) {
-    const tokens = await this.authService.signin(req.body as AuthDto);
-    return res.json(tokens);
+    try {
+      const tokens = await this.authService.signin(req.body as AuthDto);
+      return res.json(tokens);
+    } catch(err) {
+      res.status(500).json(err)
+    }
   }
 
   async users(req: Request, res: Response) {
-    const users = await this.authService.getAll();
-    return res.json(users);
+    try {
+      const users = await this.authService.getAll();
+      return res.json(users);
+    } catch(err) {
+      res.status(500).json(err)
+    }
   }
 
   async updateUserAuth(req: Request, res: Response) {
@@ -34,7 +46,7 @@ export default class AuthController {
       if (err.message === 'access denied') {
         return res.status(401).json({ error: 'access denied'});
       }
-      return res.status(500).json()
+      return res.status(500).json(err)
     }
   }
 
