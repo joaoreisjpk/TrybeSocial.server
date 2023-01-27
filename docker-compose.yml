@@ -12,6 +12,8 @@ services:
   server:
     build: .
     container_name: trybe_social_server
+    volumes:
+      - .:/user/server
     ports: 
       - 3333:3333
     command: yarn dev

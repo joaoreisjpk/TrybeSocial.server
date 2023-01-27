@@ -1,3 +1,3 @@
-import auth from './auth';
+import auth from './auth.dto';
 
 export default auth;
