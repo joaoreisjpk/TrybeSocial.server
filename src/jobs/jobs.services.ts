@@ -1,19 +1,20 @@
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient as PrismaClientType } from '@prisma/client';
+import PrismaClient from '../prisma';
 
 export default class UserService {
-  prisma: PrismaClient;
+  prisma: PrismaClientType;
 
   secret: string;
 
   constructor() {
-    this.prisma = new PrismaClient();
+    this.prisma = PrismaClient;
   }
 
   async listJobs() {
     return this.prisma.job.findMany();
   }
 
-  async createJob(data: { name: string, link: string}) {
+  async createJob(data: { title: string, description: string, link: string}) {
     return this.prisma.job.create({ data });
   }
 }

@@ -3,14 +3,14 @@ import AuthRouter from './auth/auth.routes';
 import JobsRouter from './jobs/jobs.routes';
 import LabsRouter from './labs/labs.routes';
 import AuthController from './auth/auth.controller';
-import { AuthService } from './auth/auth.services';
+import AuthService from './auth/auth.services';
 
 const router = Router();
 
 const validateToken = (req, res, next) => {
   const authService = new AuthService();
   return new AuthController(authService).validateToken(req, res, next);
-}
+};
 
 router.use('/auth', AuthRouter);
 router.use('/jobs', validateToken, JobsRouter);

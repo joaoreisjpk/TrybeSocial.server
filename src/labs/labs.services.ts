@@ -1,19 +1,20 @@
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient as PrismaClientType } from '@prisma/client';
+import PrismaClient from '../prisma';
 
 export default class UserService {
-  prisma: PrismaClient;
+  prisma: PrismaClientType;
 
   secret: string;
 
   constructor() {
-    this.prisma = new PrismaClient();
+    this.prisma = PrismaClient;
   }
 
   async listLabs() {
     return this.prisma.lab.findMany();
   }
 
-  async createLab(data: { name: string, link: string}) {
+  async createLab(data: { title: string, description: string, link: string}) {
     return this.prisma.lab.create({ data });
   }
 }

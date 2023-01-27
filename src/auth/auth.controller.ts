@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { AuthService } from './auth.services';
+import AuthService from './auth.services';
 import AuthDto from './dto';
 
 export default class AuthController {
@@ -13,8 +13,8 @@ export default class AuthController {
     try {
       const tokens = await this.authService.signup(req.body as AuthDto);
       return res.json(tokens);
-    } catch(err) {
-      res.status(500).json(err)
+    } catch (err) {
+      return res.status(500).json(err);
     }
   }
 
@@ -22,8 +22,8 @@ export default class AuthController {
     try {
       const tokens = await this.authService.signin(req.body as AuthDto);
       return res.json(tokens);
-    } catch(err) {
-      res.status(500).json(err)
+    } catch (err) {
+      return res.status(500).json(err);
     }
   }
 
@@ -31,8 +31,8 @@ export default class AuthController {
     try {
       const users = await this.authService.getAll();
       return res.json(users);
-    } catch(err) {
-      res.status(500).json(err)
+    } catch (err) {
+      return res.status(500).json(err);
     }
   }
 
@@ -44,18 +44,18 @@ export default class AuthController {
       return res.status(201).json(user);
     } catch (err: any) {
       if (err.message === 'access denied') {
-        return res.status(401).json({ error: 'access denied'});
+        return res.status(401).json({ error: 'access denied' });
       }
-      return res.status(500).json(err)
+      return res.status(500).json(err);
     }
   }
 
   async validateToken(req, res, next) {
     const { token } = req.headers as { token: string };
     const tokens = await this.authService.validateToken(token) as { error?: string};
-    
-    if (tokens?.error) res.json({ error: 'Accesso Negado' })
-    next()
+
+    if (tokens?.error) return res.json({ error: 'Accesso Negado' });
+    return next();
   }
 
   async logout(req: Request) {

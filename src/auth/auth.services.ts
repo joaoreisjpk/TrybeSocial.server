@@ -1,21 +1,21 @@
 import argon from 'argon2';
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient as PrismaClientType } from '@prisma/client';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime';
 
 import AuthDto from './dto';
 import JWToken, { decrypt } from '../helpers/crypt';
-
+import PrismaClient from '../prisma';
 // Decrypt
 
 const jwt = new JWToken();
 
-export class AuthService {
-  prisma: PrismaClient;
+export default class AuthService {
+  prisma: PrismaClientType;
 
   secret: string;
 
   constructor() {
-    this.prisma = new PrismaClient();
+    this.prisma = PrismaClient;
     this.secret = process.env.JWT_SECRET;
   }
 
@@ -103,7 +103,7 @@ export class AuthService {
       },
     });
     if (!user?.tokenRt) throw new Error('access denied');
-    
+
     const isArgonVerified = await argon.verify(user.tokenRt, currentAuthToken);
 
     if (!isArgonVerified) throw new Error('access denied');
@@ -124,10 +124,11 @@ export class AuthService {
   }
 
   async validateToken(rt: string) {
-    const jwtt = jwt.decode(rt) as { email: string }
+    const jwtt = jwt.decode(rt) as { email: string };
+    if (!jwtt) return { error: 'Accesso Negado' };
     const user = await this.prisma.user.findUnique({
       where: {
-        email: jwtt?.email,
+        email: jwtt.email,
       },
     });
 
@@ -156,6 +157,6 @@ export class AuthService {
     const accessToken = jwt.sign(email, '7d');
     // const refreshToken = jwt.sign(email, '3d');
 
-    return accessToken
+    return accessToken;
   }
 }
