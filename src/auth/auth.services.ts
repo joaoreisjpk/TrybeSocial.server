@@ -1,17 +1,11 @@
 import argon from 'argon2';
 import { PrismaClient } from '@prisma/client';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime';
-import CryptoJS from 'crypto-js';
 
 import AuthDto from './dto';
-import JWToken from '../helpers/jwt';
+import JWToken, { decrypt } from '../helpers/crypt';
 
 // Decrypt
-export const decrypt = (message: string) => {
-  const secret = process.env.JWT_SECRET.replace(/(\r\n|\n|\r)/gm, '');
-  const bytes = CryptoJS.AES.decrypt(message, secret);
-  return bytes.toString(CryptoJS.enc.Utf8);
-};
 
 const jwt = new JWToken();
 
