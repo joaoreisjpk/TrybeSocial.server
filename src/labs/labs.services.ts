@@ -1,6 +1,14 @@
 import { PrismaClient as PrismaClientType } from '@prisma/client';
 import PrismaClient from '../prisma';
 
+export interface ILab {
+  title: string
+  description: string
+  repositoryLink: string
+  contactLink: string
+  contactNumber: string
+}
+
 export default class UserService {
   prisma: PrismaClientType;
 
@@ -14,7 +22,7 @@ export default class UserService {
     return this.prisma.lab.findMany();
   }
 
-  async createLab(data: { title: string, description: string, link: string}) {
+  async createLab(data: ILab) {
     return this.prisma.lab.create({ data });
   }
 }

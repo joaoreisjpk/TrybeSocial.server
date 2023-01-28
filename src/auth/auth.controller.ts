@@ -14,7 +14,7 @@ export default class AuthController {
       const tokens = await this.authService.signup(req.body as AuthDto);
       return res.json(tokens);
     } catch (err) {
-      return res.status(500).json(err);
+      return res.status(500).send(err);
     }
   }
 
@@ -23,7 +23,7 @@ export default class AuthController {
       const tokens = await this.authService.signin(req.body as AuthDto);
       return res.json(tokens);
     } catch (err) {
-      return res.status(500).json(err);
+      return res.status(500).send(err);
     }
   }
 
@@ -32,7 +32,7 @@ export default class AuthController {
       const users = await this.authService.getAll();
       return res.json(users);
     } catch (err) {
-      return res.status(500).json(err);
+      return res.status(500).send(err);
     }
   }
 
@@ -46,7 +46,7 @@ export default class AuthController {
       if (err.message === 'access denied') {
         return res.status(401).json({ error: 'access denied' });
       }
-      return res.status(500).json(err);
+      return res.status(500).send(err);
     }
   }
 
