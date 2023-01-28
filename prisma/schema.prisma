@@ -45,7 +45,9 @@ model Lab {
 
   title  String @default("")
   description String @default("")
-  link String
+  repositoryLink String @default("")
+  contactLink String @default("")
+  contactNumber String @default("")
 
   @@map("labs")
 }

@@ -13,7 +13,7 @@ export default class JobsController {
       const user = await this.jobsService.listJobs();
       return res.json(user);
     } catch (err) {
-      return res.status(500).json(err);
+      return res.status(500).send(err);
     }
   }
 
@@ -22,7 +22,7 @@ export default class JobsController {
       const user = await this.jobsService.createJob(req.body);
       return res.json(user);
     } catch (err) {
-      return res.status(500).json(err);
+      return res.status(500).send(err);
     }
   }
 }
