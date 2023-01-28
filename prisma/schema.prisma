@@ -31,7 +31,8 @@ model Job {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  name  String
+  title  String @default("")
+  description String @default("")
   link String
 
   @@map("jobs")
@@ -42,7 +43,8 @@ model Lab {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  name  String
+  title  String @default("")
+  description String @default("")
   link String
 
   @@map("labs")
