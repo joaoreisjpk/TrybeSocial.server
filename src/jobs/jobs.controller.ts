@@ -11,6 +11,7 @@ export default class JobsController {
   async listJobs(req: Request, res: Response) {
     try {
       const user = await this.jobsService.listJobs();
+
       return res.json(user);
     } catch (err) {
       return res.status(500).send(err);
