@@ -23,7 +23,9 @@ export default class AuthService {
     const {
       email, password, firstName, lastName,
     } = dto;
+    console.log(email, password);
     const hash = await argon.hash(password);
+    console.log('hash');
 
     try {
       const newUser = await this.prisma.user.create({
@@ -50,9 +52,11 @@ export default class AuthService {
     } catch (err) {
       if (err instanceof PrismaClientKnownRequestError) {
         if (err.code === 'P2002') {
+          console.log(err);
           return { error: 'Email já utilizado' };
         }
       }
+      console.log(err);
       return { error: err };
     }
   }
