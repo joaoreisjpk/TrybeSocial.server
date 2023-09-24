@@ -18,6 +18,7 @@ module.exports = {
   ignorePatterns: ['.eslintrc.js'],
   rules: {
     'import/extensions': 'off',
-    'import/no-unresolved': 'off'
+    'import/no-unresolved': 'off',
+    'linebreak-style': 'off'
   },
 };

@@ -10,7 +10,7 @@ export default class JWToken {
   }
 
   sign(email: string, expiresIn: string) {
-    return jwt.sign({email}, this.secret, {
+    return jwt.sign({ email }, this.secret, {
       algorithm: 'HS256',
       expiresIn,
     });
