@@ -1,11 +1,11 @@
 import { io } from '../http';
-import debugPrint from '../utils/debugPrint';
+import getMessages from './getMessages';
+import sendMessage from './sendMessage';
 
 let roomUsers = {} as any;
 
 io.on('connection', (socket) => {
   io.emit('users_response', roomUsers);
-  debugPrint(`User Connected: ${socket.id}`);
 
   socket.on('join_room', (roomId) => {
     socket.join(roomId);
@@ -14,20 +14,21 @@ io.on('connection', (socket) => {
       [roomId]: [...(roomUsers[roomId] ?? []), socket.id],
     };
     io.emit('users_response', roomUsers);
-    debugPrint(`User with ID: ${socket.id} joined room: ${roomId}`);
   });
 
   socket.on('send_message', (data) => {
-    debugPrint(`message: ${Object.keys(data)}`);
     io.emit('receive_message', data);
   });
+
+  socket.on('sendMessage', (data) => sendMessage(data, io));
+
+  socket.on('getMessages', (data) => getMessages(data, io));
 
   socket.on('typing', (data) => {
     socket.broadcast.emit('typing_response', data);
   });
 
   socket.on('disconnect', () => {
-    debugPrint('User Disconnected', socket.id);
     for (const [roomId, users] of Object.entries(roomUsers)) {
       if (users.includes(socket.id)) {
         roomUsers[roomId] = [...users.filter((id) => id !== socket.id)];

@@ -29,7 +29,6 @@ export default class AuthController {
   async getUser(req: Request, res: Response) {
     try {
       const users = await this.authService.getUser(req);
-      console.log(users);
       return res.json(users);
     } catch (err) {
       return res.status(500).send(err);
