@@ -1,6 +1,5 @@
 import argon from 'argon2';
-import { PrismaClient as PrismaClientType } from '@prisma/client';
-import { PrismaClientKnownRequestError } from '@prisma/client/runtime';
+import { PrismaClient as PrismaClientType, Prisma } from '@prisma/client';
 
 import AuthDto from './dto';
 import JWToken, { decrypt } from '../helpers/crypt';
@@ -40,6 +39,7 @@ export default class AuthService {
 
       return {
         user: {
+          id: newUser.id,
           email: newUser.email,
           firstName: newUser.firstName,
           lastName: newUser.lastName,
@@ -48,7 +48,7 @@ export default class AuthService {
         },
       };
     } catch (err) {
-      if (err instanceof PrismaClientKnownRequestError) {
+      if (err instanceof Prisma.PrismaClientKnownRequestError) {
         if (err.code === 'P2002') {
           console.log(err);
           return { error: 'Email já utilizado' };
@@ -76,6 +76,7 @@ export default class AuthService {
 
     return {
       user: {
+        id: user.id,
         email: user.email,
         firstName: user.firstName,
         lastName: user.lastName,
@@ -116,6 +117,7 @@ export default class AuthService {
 
     return {
       user: {
+        id: user.id,
         email: user.email,
         firstName: user.firstName,
         lastName: user.lastName,

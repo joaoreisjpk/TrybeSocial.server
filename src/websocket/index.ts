@@ -1,5 +1,5 @@
-import { io } from './http';
-import debugPrint from './utils/debugPrint';
+import { io } from '../http';
+import debugPrint from '../utils/debugPrint';
 
 let roomUsers = {} as any;
 
