@@ -43,8 +43,8 @@ export default class AuthController {
       const user = await this.authService.updateUserAuth(email, token);
       return res.status(201).json(user);
     } catch (err: any) {
-      if (err.message === 'access denied') {
-        return res.status(401).json({ error: 'access denied' });
+      if (err.message?.includes('access denied')) {
+        return res.status(401).json({ error: 'updateUserAuth access denied' });
       }
       return res.status(500).send(err);
     }
@@ -54,7 +54,7 @@ export default class AuthController {
     const { token } = req.headers as { token: string };
     const tokens = await this.authService.validateToken(token) as { error?: string};
 
-    if (tokens?.error) return res.json({ error: 'Accesso Negado' });
+    if (tokens?.error) return res.json({ error: 'validateToken access denied' });
     return next();
   }
 

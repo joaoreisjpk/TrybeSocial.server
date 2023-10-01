@@ -103,11 +103,11 @@ export default class AuthService {
         email,
       },
     });
-    if (!user?.tokenRt) throw new Error('access denied');
+    if (!user?.tokenRt) throw new Error('updateUserAuth access denied');
 
     const isArgonVerified = await argon.verify(user.tokenRt, currentAuthToken);
 
-    if (!isArgonVerified) throw new Error('access denied');
+    if (!isArgonVerified) throw new Error('updateUserAuth access denied');
 
     const accessToken = await this.getTokens(user.email);
 
@@ -127,19 +127,19 @@ export default class AuthService {
 
   async validateToken(rt: string) {
     const jwtt = jwt.decode(rt) as { email: string };
-    if (!jwtt) return { error: 'Accesso Negado' };
+    if (!jwtt) return { error: 'validateToken access denied' };
     const user = await this.prisma.user.findUnique({
       where: {
         email: jwtt.email,
       },
     });
 
-    if (!user || !user.tokenRt) return { error: 'Accesso Negado' };
+    if (!user || !user.tokenRt) return { error: 'validateToken access denied' };
 
     const isArgonVerified = await argon.verify(user.tokenRt, rt);
-    if (!isArgonVerified) return { error: 'Accesso Negado' };
+    if (!isArgonVerified) return { error: 'validateToken access denied' };
 
-    return isArgonVerified ? {} : { error: 'Accesso Negado' };
+    return isArgonVerified ? {} : { error: 'validateToken access denied' };
   }
 
   async updateRtHash(email: string, rt: string) {

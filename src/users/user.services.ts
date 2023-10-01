@@ -1,19 +1,9 @@
-import { PrismaClient as PrismaClientType } from '@prisma/client';
 import PrismaClient from '../prisma';
 
 export default class AuthService {
-  prisma: PrismaClientType;
-
-  secret: string;
-
-  constructor() {
-    this.prisma = PrismaClient;
-    this.secret = process.env.JWT_SECRET;
-  }
-
-  async getUser(req: any) {
+  static async getUser(req: any) {
     const id = req.params.userId;
-    const user = await this.prisma.user.findUnique({
+    const user = await PrismaClient.user.findUnique({
       where: {
         id,
       },
@@ -29,16 +19,8 @@ export default class AuthService {
     };
   }
 
-  async getAll() {
-    return this.prisma.user.findMany();
-  }
-
-  async findUsers(email: string) {
-    await this.prisma.user.update({
-      where: {
-        email,
-      },
-      data: { tokenRt: null },
-    });
+  static async findUsers({ query: { email } }: any) {
+    const users = await PrismaClient.user.findMany({ where: { email: { contains: email } } });
+    return users;
   }
 }
